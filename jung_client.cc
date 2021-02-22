@@ -83,6 +83,7 @@ int main(int argc, char** argv) {
     if (start_pos != string::npos) {
       start_pos += arg_str.size();
       if (arg_val[start_pos] == '=') {
+		//TODO add default port if not passed
         target_str = arg_val.substr(start_pos + 1);
       } else {
         cout << "The only correct argument syntax is --target=" << endl;
@@ -101,7 +102,7 @@ int main(int argc, char** argv) {
   // Send the message
   string message("mamma");
   string reply = jung.Respond(message);
-  
+
   cout << "Sent: " << message << endl;
   cout << "Received: " << reply << endl;
 
