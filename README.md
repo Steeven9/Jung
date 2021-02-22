@@ -1,5 +1,7 @@
 # Jung
-Bachelor Project at USI, Lugano
+Bachelor Project at USI, Lugano.
+
+A tool for Instrumentation and Performance Analysis of Distributed Systems based on [Freud](https://github.com/usi-systems/freud) and [gRPC](https://grpc.io).
 
 
 ## Install gRPC
@@ -26,6 +28,6 @@ Then in another terminal run the client (from the `cmake/build` folder)
 
 ## Running on another machine
 
-If your server is running on another machine (which is probably the case), simply pass its address/hostname to the client as parameter (port is 50051 by default):
+If your server is running on another machine (which is probably the case), simply pass its address/hostname to the client as parameter (port is `50051` by default):
 
-`./jung_client --target=HOSTNAME:PORT`
+`./jung_client --target=HOSTNAME[:PORT]`

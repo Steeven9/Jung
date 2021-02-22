@@ -24,6 +24,8 @@
 
 #include "jung.grpc.pb.h"
 
+#define SERVER_PORT 50051
+
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
@@ -83,8 +85,14 @@ int main(int argc, char** argv) {
     if (start_pos != string::npos) {
       start_pos += arg_str.size();
       if (arg_val[start_pos] == '=') {
-		//TODO add default port if not passed
         target_str = arg_val.substr(start_pos + 1);
+
+		//Add default port if not explicitly passed
+		if (target_str.find(":") == string::npos) {
+			target_str += ":" + to_string(SERVER_PORT);
+		}
+
+		cout << "Connecting to " << target_str << endl;
       } else {
         cout << "The only correct argument syntax is --target=" << endl;
         return 0;
@@ -94,7 +102,7 @@ int main(int argc, char** argv) {
       return 0;
     }
   } else {
-    target_str = "localhost:50051";
+    target_str = "localhost:" + to_string(SERVER_PORT);
   }
   JungClient jung(grpc::CreateChannel(
       target_str, grpc::InsecureChannelCredentials()));

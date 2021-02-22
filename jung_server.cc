@@ -26,6 +26,9 @@
 
 #include "jung.grpc.pb.h"
 
+#define SERVER_PORT 50051
+#define VERBOSE 1
+
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
@@ -42,12 +45,16 @@ class JungServiceImpl final : public Jung::Service {
                   JungReply* reply) override {
     string prefix("Ciao ");
     reply->set_message(prefix + request->message());
+    
+    if (VERBOSE == 1) {
+      cout << "Received " << request->message() << endl;
+    }
     return Status::OK;
   }
 };
 
 void RunServer() {
-  string server_address("0.0.0.0:50051");
+  string server_address("0.0.0.0:" + to_string(SERVER_PORT));
   JungServiceImpl service;
 
   grpc::EnableDefaultHealthCheckService(true);
