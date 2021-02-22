@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package jung;
+
+service Jung {
+    rpc Respond (JungRequest) returns (JungReply) {}
+}
+
+message JungRequest {
+    string message = 1;
+}
+
+message JungReply {
+    string message = 1;
+}
