@@ -61,8 +61,7 @@ class JungClient {
     if (status.ok()) {
       return reply.message();
     } else {
-      cout << status.error_code() << ": " << status.error_message()
-                << endl;
+      cout << status.error_code() << ": " << status.error_message() << endl;
       return "RPC failed";
     }
   }
@@ -79,11 +78,14 @@ int main(int argc, char** argv) {
   // InsecureChannelCredentials()).
   string target_str;
   string arg_str("--target");
+
   if (argc > 1) {
     string arg_val = argv[1];
     size_t start_pos = arg_val.find(arg_str);
+
     if (start_pos != string::npos) {
       start_pos += arg_str.size();
+	  
       if (arg_val[start_pos] == '=') {
         target_str = arg_val.substr(start_pos + 1);
 

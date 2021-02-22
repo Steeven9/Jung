@@ -39,15 +39,19 @@ using jung::Jung;
 
 using namespace std;
 
+// Global counter for IDs
+int replyId = 0;
+
 // Logic and data behind the server's behavior.
 class JungServiceImpl final : public Jung::Service {
   Status Respond(ServerContext* context, const JungRequest* request,
                   JungReply* reply) override {
     string prefix("Ciao ");
     reply->set_message(prefix + request->message());
-    
+    reply->set_id(++replyId);
+
     if (VERBOSE == 1) {
-      cout << "Received " << request->message() << endl;
+      cout << "Received req #" << reply->id() << ": " << request->message() << endl;
     }
     return Status::OK;
   }
