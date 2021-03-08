@@ -1,3 +1,16 @@
 .vscode/
-
+pin/
 cmake/
+*_log.txt
+
+# LaTeX
+*.log
+*.synctex.gz
+*.aux
+*.toc
+*.out
+
+# System
+Thumbs.db
+desktop.ini
+.DS_Store

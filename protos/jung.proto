@@ -3,7 +3,8 @@ syntax = "proto3";
 package jung;
 
 service Jung {
-    rpc Respond (JungRequest) returns (JungReply) {}
+    rpc Greet (JungRequest) returns (JungReply) {}
+    rpc ReturnDouble (JungRequest) returns (JungReply) {}
 }
 
 message JungRequest {

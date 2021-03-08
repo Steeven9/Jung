@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2015 gRPC authors.
+ * Copyright 2021 gRPC authors and Stefano Taillefert.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
 
 #include "jung.grpc.pb.h"
+#include "custom_instr.h"
 
 #define SERVER_PORT 50051
 #define VERBOSE 1
@@ -44,15 +45,32 @@ int replyId = 0;
 
 // Logic and data behind the server's behavior.
 class JungServiceImpl final : public Jung::Service {
-  Status Respond(ServerContext* context, const JungRequest* request,
+  Status Greet(ServerContext* context, const JungRequest* request,
                   JungReply* reply) override {
+    start_instrum("Greet #" + to_string(++replyId), "server", -1);
+
     string prefix("Ciao ");
     reply->set_message(prefix + request->message());
-    reply->set_id(++replyId);
+    reply->set_id(replyId);
 
     if (VERBOSE == 1) {
-      cout << "Received req #" << reply->id() << ": " << request->message() << endl;
+      cout << "Received Greet req #" << replyId << ": " << request->message() << endl;
     }
+    finish_instrum("Greet");
+    return Status::OK;
+  }
+
+  Status ReturnDouble(ServerContext* context, const JungRequest* request,
+                  JungReply* reply) override {
+    start_instrum("ReturnDouble #" + to_string(++replyId), "server", -1);
+
+    reply->set_message(to_string(stoi(request->message()) * 2));
+    reply->set_id(replyId);
+
+    if (VERBOSE == 1) {
+      cout << "Received ReturnDouble req #" << replyId << ": " << request->message() << endl;
+    }
+    finish_instrum("ReturnDouble");
     return Status::OK;
   }
 };

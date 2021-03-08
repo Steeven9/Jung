@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2015 gRPC authors.
+ * Copyright 2021 gRPC authors and Stefano Taillefert.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,16 @@
 
 #include <iostream>
 #include <memory>
+#include <stdlib.h>
 #include <string>
 
 #include <grpcpp/grpcpp.h>
 
 #include "jung.grpc.pb.h"
+#include "custom_instr.h"
 
 #define SERVER_PORT 50051
+#define NUM_MSG 10
 
 using grpc::Channel;
 using grpc::ClientContext;
@@ -42,7 +45,7 @@ class JungClient {
 
   // Assembles the client's payload, sends it and presents the response back
   // from the server.
-  string Respond(const string& message) {
+  JungReply Greet(const string& message) {
     // Data we are sending to the server.
     JungRequest request;
     request.set_message(message);
@@ -55,20 +58,47 @@ class JungClient {
     ClientContext context;
 
     // The actual RPC.
-    Status status = stub_->Respond(&context, request, &reply);
+    Status status = stub_->Greet(&context, request, &reply);
 
     // Act upon its status.
-    if (status.ok()) {
-      return reply.message();
-    } else {
-      cout << status.error_code() << ": " << status.error_message() << endl;
-      return "RPC failed";
+    if (!status.ok()) {
+      cerr << "Error #" << status.error_code() << ": " << status.error_message() << endl;
+      exit(EXIT_FAILURE);
     }
+    return reply;
   }
 
  private:
   unique_ptr<Jung::Stub> stub_;
 };
+
+/*
+  The function to be analyzed. Takes an int parameter 
+  that should make the complexity scale.
+*/
+void doStuff(string target_str, unsigned int param) {
+  start_instrum("doStuff", "client", param);
+
+  JungClient jung(grpc::CreateChannel(
+      target_str, grpc::InsecureChannelCredentials()));
+
+  // Allocate some memory so we can track it
+  custom_malloc("doStuff", param);
+
+  // Send the messages
+  for (int i = 0; i < param; ++i) {
+    string message("mamma " + to_string(i));
+    JungReply reply = jung.Greet(message);
+
+    cout << "Sent: " << message << endl;
+    cout << "Received: " << reply.message() << endl;
+
+    // Save the resulting id from the RPC call
+    write_log("doStuff RPC #" + to_string(reply.id()));
+  } 
+  
+  finish_instrum("doStuff");
+}
 
 int main(int argc, char** argv) {
   // Instantiate the client. It requires a channel, out of which the actual RPCs
@@ -89,7 +119,7 @@ int main(int argc, char** argv) {
       if (arg_val[start_pos] == '=') {
         target_str = arg_val.substr(start_pos + 1);
 
-		//Add default port if not explicitly passed
+		// Add default port if not explicitly passed
 		if (target_str.find(":") == string::npos) {
 			target_str += ":" + to_string(SERVER_PORT);
 		}
@@ -106,15 +136,8 @@ int main(int argc, char** argv) {
   } else {
     target_str = "localhost:" + to_string(SERVER_PORT);
   }
-  JungClient jung(grpc::CreateChannel(
-      target_str, grpc::InsecureChannelCredentials()));
 
-  // Send the message
-  string message("mamma");
-  string reply = jung.Respond(message);
-
-  cout << "Sent: " << message << endl;
-  cout << "Received: " << reply << endl;
+  doStuff(target_str, NUM_MSG);
 
   return 0;
 }
