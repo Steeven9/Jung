@@ -39,105 +39,104 @@ using jung::Jung;
 using namespace std;
 
 class JungClient {
- public:
-  JungClient(shared_ptr<Channel> channel)
-      : stub_(Jung::NewStub(channel)) {}
+	public:
+		JungClient(shared_ptr<Channel> channel): stub_(Jung::NewStub(channel)) {}
 
-  // Assembles the client's payload, sends it and presents the response back
-  // from the server.
-  JungReply Greet(const string& message) {
-    // Data we are sending to the server.
-    JungRequest request;
-    request.set_message(message);
+		// Assembles the client's payload, sends it and presents the response back
+		// from the server.
+		JungReply Greet(const string& message) {
+			// Data we are sending to the server.
+			JungRequest request;
+			request.set_message(message);
 
-    // Container for the data we expect from the server.
-    JungReply reply;
+			// Container for the data we expect from the server.
+			JungReply reply;
 
-    // Context for the client. It could be used to convey extra information to
-    // the server and/or tweak certain RPC behaviors.
-    ClientContext context;
+			// Context for the client. It could be used to convey extra information to
+			// the server and/or tweak certain RPC behaviors.
+			ClientContext context;
 
-    // The actual RPC.
-    Status status = stub_->Greet(&context, request, &reply);
+			// The actual RPC.
+			Status status = stub_->Greet(&context, request, &reply);
 
-    // Act upon its status.
-    if (!status.ok()) {
-      cerr << "Error #" << status.error_code() << ": " << status.error_message() << endl;
-      exit(EXIT_FAILURE);
-    }
-    return reply;
-  }
+			// Act upon its status.
+			if (!status.ok()) {
+				cerr << "Error #" << status.error_code() << ": " << status.error_message() << endl;
+				exit(EXIT_FAILURE);
+			}
+			return reply;
+		}
 
- private:
-  unique_ptr<Jung::Stub> stub_;
+	private:
+		unique_ptr<Jung::Stub> stub_;
 };
 
 /*
-  The function to be analyzed. Takes an int parameter 
-  that should make the complexity scale.
+	The function to be analyzed. Takes an int parameter
+	that should make the complexity scale.
 */
 void doStuff(string target_str, unsigned int param) {
-  start_instrum("doStuff", "client", param);
+	start_instrum("doStuff", "client", param);
 
-  JungClient jung(grpc::CreateChannel(
-      target_str, grpc::InsecureChannelCredentials()));
+	JungClient jung(grpc::CreateChannel(
+		target_str, grpc::InsecureChannelCredentials()));
 
-  // Allocate some memory so we can track it
-  custom_malloc("doStuff", param);
+	// Allocate some memory so we can track it
+	custom_malloc("doStuff", param);
 
-  // Send the messages
-  for (int i = 0; i < param; ++i) {
-    string message("mamma " + to_string(i));
-    JungReply reply = jung.Greet(message);
+	// Send the messages
+	for (int i = 0; i < param; ++i) {
+		string message("mamma " + to_string(i));
+		JungReply reply = jung.Greet(message);
 
-    cout << "Sent: " << message << endl;
-    cout << "Received: " << reply.message() << endl;
+		cout << "Sent: " << message << endl;
+		cout << "Received: " << reply.message() << endl;
 
-    // Save the resulting id from the RPC call
-    write_log("doStuff RPC #" + to_string(reply.id()));
-  } 
-  
-  finish_instrum("doStuff");
+		// Save the resulting id from the RPC call
+		write_log("doStuff RPC #" + to_string(reply.id()));
+	}
+
+	finish_instrum("doStuff");
 }
 
 int main(int argc, char** argv) {
-  // Instantiate the client. It requires a channel, out of which the actual RPCs
-  // are created. This channel models a connection to an endpoint specified by
-  // the argument "--target=" which is the only expected argument.
-  // We indicate that the channel isn't authenticated (use of
-  // InsecureChannelCredentials()).
-  string target_str;
-  string arg_str("--target");
+	// Instantiate the client. It requires a channel, out of which the actual RPCs
+	// are created. This channel models a connection to an endpoint specified by
+	// the argument "--target=" which is the only expected argument.
+	// We indicate that the channel isn't authenticated (use of
+	// InsecureChannelCredentials()).
+	string target_str;
+	string arg_str("--target");
 
-  if (argc > 1) {
-    string arg_val = argv[1];
-    size_t start_pos = arg_val.find(arg_str);
+	if (argc > 1) {
+		string arg_val = argv[1];
+		size_t start_pos = arg_val.find(arg_str);
 
-    if (start_pos != string::npos) {
-      start_pos += arg_str.size();
-	  
-      if (arg_val[start_pos] == '=') {
-        target_str = arg_val.substr(start_pos + 1);
+		if (start_pos != string::npos) {
+			start_pos += arg_str.size();
 
-		// Add default port if not explicitly passed
-		if (target_str.find(":") == string::npos) {
-			target_str += ":" + to_string(SERVER_PORT);
+			if (arg_val[start_pos] == '=') {
+				target_str = arg_val.substr(start_pos + 1);
+
+				// Add default port if not explicitly passed
+				if (target_str.find(":") == string::npos) {
+					target_str += ":" + to_string(SERVER_PORT);
+				}
+
+				cout << "Connecting to " << target_str << endl;
+			} else {
+				cout << "The only correct argument syntax is --target=" << endl;
+				return 0;
+			}
+		} else {
+			cout << "The only acceptable argument is --target=" << endl;
+			return 0;
 		}
+	} else {
+		target_str = "localhost:" + to_string(SERVER_PORT);
+	}
 
-		cout << "Connecting to " << target_str << endl;
-      } else {
-        cout << "The only correct argument syntax is --target=" << endl;
-        return 0;
-      }
-    } else {
-      cout << "The only acceptable argument is --target=" << endl;
-      return 0;
-    }
-  } else {
-    target_str = "localhost:" + to_string(SERVER_PORT);
-  }
+	doStuff(target_str, NUM_MSG);
 
-  doStuff(target_str, NUM_MSG);
-
-  return 0;
+	return 0;
 }

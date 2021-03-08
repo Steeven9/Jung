@@ -45,59 +45,59 @@ int replyId = 0;
 
 // Logic and data behind the server's behavior.
 class JungServiceImpl final : public Jung::Service {
-  Status Greet(ServerContext* context, const JungRequest* request,
-                  JungReply* reply) override {
-    start_instrum("Greet #" + to_string(++replyId), "server", -1);
+	Status Greet(ServerContext* context, const JungRequest* request,
+					JungReply* reply) override {
+		start_instrum("Greet #" + to_string(++replyId), "server", -1);
 
-    string prefix("Ciao ");
-    reply->set_message(prefix + request->message());
-    reply->set_id(replyId);
+		string prefix("Ciao ");
+		reply->set_message(prefix + request->message());
+		reply->set_id(replyId);
 
-    if (VERBOSE == 1) {
-      cout << "Received Greet req #" << replyId << ": " << request->message() << endl;
-    }
-    finish_instrum("Greet");
-    return Status::OK;
-  }
+		if (VERBOSE == 1) {
+			cout << "Received Greet req #" << replyId << ": " << request->message() << endl;
+		}
+		finish_instrum("Greet");
+		return Status::OK;
+	}
 
-  Status ReturnDouble(ServerContext* context, const JungRequest* request,
-                  JungReply* reply) override {
-    start_instrum("ReturnDouble #" + to_string(++replyId), "server", -1);
+	Status ReturnDouble(ServerContext* context, const JungRequest* request,
+							JungReply* reply) override {
+		start_instrum("ReturnDouble #" + to_string(++replyId), "server", -1);
 
-    reply->set_message(to_string(stoi(request->message()) * 2));
-    reply->set_id(replyId);
+		reply->set_message(to_string(stoi(request->message()) * 2));
+		reply->set_id(replyId);
 
-    if (VERBOSE == 1) {
-      cout << "Received ReturnDouble req #" << replyId << ": " << request->message() << endl;
-    }
-    finish_instrum("ReturnDouble");
-    return Status::OK;
-  }
+		if (VERBOSE == 1) {
+			cout << "Received ReturnDouble req #" << replyId << ": " << request->message() << endl;
+		}
+		finish_instrum("ReturnDouble");
+		return Status::OK;
+	}
 };
 
 void RunServer() {
-  string server_address("0.0.0.0:" + to_string(SERVER_PORT));
-  JungServiceImpl service;
+	string server_address("0.0.0.0:" + to_string(SERVER_PORT));
+	JungServiceImpl service;
 
-  grpc::EnableDefaultHealthCheckService(true);
-  grpc::reflection::InitProtoReflectionServerBuilderPlugin();
-  ServerBuilder builder;
-  // Listen on the given address without any authentication mechanism.
-  builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-  // Register "service" as the instance through which we'll communicate with
-  // clients. In this case it corresponds to an *synchronous* service.
-  builder.RegisterService(&service);
-  // Finally assemble the server.
-  unique_ptr<Server> server(builder.BuildAndStart());
-  cout << "Jung server listening on " << server_address << endl;
+	grpc::EnableDefaultHealthCheckService(true);
+	grpc::reflection::InitProtoReflectionServerBuilderPlugin();
+	ServerBuilder builder;
+	// Listen on the given address without any authentication mechanism.
+	builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+	// Register "service" as the instance through which we'll communicate with
+	// clients. In this case it corresponds to an *synchronous* service.
+	builder.RegisterService(&service);
+	// Finally assemble the server.
+	unique_ptr<Server> server(builder.BuildAndStart());
+	cout << "Jung server listening on " << server_address << endl;
 
-  // Wait for the server to shutdown. Note that some other thread must be
-  // responsible for shutting down the server for this call to ever return.
-  server->Wait();
+	// Wait for the server to shutdown. Note that some other thread must be
+	// responsible for shutting down the server for this call to ever return.
+	server->Wait();
 }
 
 int main(int argc, char** argv) {
-  RunServer();
+	RunServer();
 
-  return 0;
+	return 0;
 }
