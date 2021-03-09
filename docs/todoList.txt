@@ -1,0 +1,30 @@
+Done so far
+---------------------
+- setup gRPC, freud and a basic infrastructure to work on (VMs, repo, ...)
+- basic toy example with gRPC
+- basic hardcoded instrumentation on the example
+- add parameter-dependant complexity (loop ~10 RPC calls and malloc)
+- print memory usage and execution timestamps
+- produce performance traces (txt files with timestamps)
+- associate server-side executions with an ID to send to the client
+
+---------------------
+TODO for next step
+
+- develop a tool to merge the performance logs from client and server
+- start on the report template
+
+---------------------
+TODO for long-term
+
+- integrate said unified trace in the existing statistics tool (freud-statistics)
+- identify some third-party non-trivial distributed applications and analyze them
+- write the report, prepare the poster and presentation 
+- have a pizza
+
+---------------------
+TODO in the next meeting
+
+- see if we can move the meetings due to lecture moving
+- see new assignment with tasks list and graph
+- check on existing instrumentation
