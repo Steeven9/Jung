@@ -40,10 +40,10 @@ vpath %.proto .
 
 all: system-check jung_client jung_server
 
-jung_client: jung.pb.o jung.grpc.pb.o jung_client.o
+jung_client: jung.pb.o jung.grpc.pb.o jung_client.o custom_instr.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-jung_server: jung.pb.o jung.grpc.pb.o jung_server.o
+jung_server: jung.pb.o jung.grpc.pb.o jung_server.o custom_instr.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 .PRECIOUS: %.grpc.pb.cc

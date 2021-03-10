@@ -26,69 +26,31 @@
 
 using namespace std;
 
-ofstream log_p;
+extern ofstream log_p;
 
-void write_log(string msg) {
-	// get current timestamp
-	int64_t timestamp = duration_cast<chrono::milliseconds>(
-		chrono::system_clock::now().time_since_epoch()).count();
-
-	log_p << "[" << timestamp << "] " << msg << endl;
-}
+extern void write_log(string msg);
 
 /*
 	A custom malloc implementation that writes to the log
 	how much memory has been allocated.
 */
-void* custom_malloc(string func_name, size_t size) {
-	void* ptr = malloc(size);
-	if (!ptr) {
-		cerr << "Cannot allocate memory" << endl;
-		exit(EXIT_FAILURE);
-	}
-	write_log(func_name + " Malloc " + to_string(size));
-	return ptr;
-}
+extern void* custom_malloc(string func_name, size_t size);
 
 /*
 	A custom free implementation that writes to the log
 	how much memory has been freed.
 */
-void custom_free(string func_name, void* ptr) {
-	if (!ptr) {
-		cerr << "Cannot free memory" << endl;
-		exit(EXIT_FAILURE);
-	}
-	write_log(func_name + " Free");
-	free(ptr);
-}
+extern void custom_free(string func_name, void* ptr);
 
 /*
 	Strart our custom instrumentation tracker.
 	Side is either "server" or "client".
 */
-void start_instrum(string func_name, string side, int param) {
-	ios_base::openmode mode = ofstream::out;
-	if (side == "server") {
-		mode = ofstream::app;
-	}
-
-	log_p.open(side + "_log.txt", mode);
-
-	string msg = func_name + " START";
-	if (param != -1) {
-		msg += " param=" + to_string(param);
-	}
-
-	write_log(msg);
-}
+extern void start_instrum(string func_name, string side, int param);
 
 /*
 	Stops the instrumentation.
 */
-void finish_instrum(string func_name) {
-	write_log(func_name + " END");
-	log_p.close();
-}
+extern void finish_instrum(string func_name);
 
 #endif
