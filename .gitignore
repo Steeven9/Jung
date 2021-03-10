@@ -1,7 +1,14 @@
 .vscode/
+.idea/
 pin/
-cmake/
 *_log.txt
+
+# Compilation output
+cmake/
+jung_client
+jung_server
+*.o
+*.pb.*
 
 # LaTeX
 *.log

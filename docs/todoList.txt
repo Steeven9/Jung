@@ -7,10 +7,12 @@ Done so far
 - print memory usage and execution timestamps
 - produce performance traces (txt files with timestamps)
 - associate server-side executions with an ID to send to the client
+- optimized compilation and installation, added cross-platform instructions
 
 ---------------------
 TODO for next step
 
+- improve performace traces
 - develop a tool to merge the performance logs from client and server
 - start on the report template
 
@@ -25,6 +27,5 @@ TODO for long-term
 ---------------------
 TODO in the next meeting
 
-- see if we can move the meetings due to lecture moving
-- see new assignment with tasks list and graph
-- check on existing instrumentation
+- see new assignment (deadline: apr 11) with tasks list and graph
+- check on improved instrumentation and merge tool prototype

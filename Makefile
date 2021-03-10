@@ -1,5 +1,5 @@
 #
-# Copyright 2015 gRPC authors.
+# Copyright 2021 gRPC authors and Stefano Taillefert.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ jung_server: jung.pb.o jung.grpc.pb.o jung_server.o custom_instr.o
 	$(PROTOC) -I . --cpp_out=. $<
 
 clean:
-	rm -f *.o *.pb.cc *.pb.h jung_client jung_server
+	rm -f *.o *.pb.cc *.pb.h jung_client jung_server *_log.txt
 
 
 # The following is to test your system and ensure a smoother experience.

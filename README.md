@@ -4,24 +4,28 @@ Bachelor Project at USI, Lugano.
 A tool for Instrumentation and Performance Analysis of Distributed Systems based on [Freud](https://github.com/usi-systems/freud) and [gRPC](https://grpc.io).
 
 
-## Install gRPC
+## Install gRPC and protobuf
 
-See the tutorial at [https://grpc.io/docs/languages/cpp/quickstart/](https://grpc.io/docs/languages/cpp/quickstart/)
+### Linux
+`sudo apt install protobuf-compiler-grpc libgrpc-dev libgrpc++-dev`
+
+### macOS
+`brew install protobuf grpc`
+
+Then add `PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/grpc/lib/pkgconfig"` 
+to your environment variables
+
+### Windows
+Get a Linux VM
 
 
 ## Compile and run the example
-
-`mkdir -p cmake/build`
-
-`pushd cmake/build`
-
-`cmake -DCMAKE_PREFIX_PATH=$MY_INSTALL_DIR ../..`
 
 `make`
 
 `./jung_server`
 
-Then in another terminal run the client (from the `cmake/build` folder)
+Then, in another terminal, run the client
 
 `./jung_client`
 
