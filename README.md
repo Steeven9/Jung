@@ -10,7 +10,7 @@ A tool for Instrumentation and Performance Analysis of Distributed Systems based
 `sudo apt install protobuf-compiler-grpc libgrpc-dev libgrpc++-dev`
 
 ### macOS
-`brew install protobuf grpc`
+`brew install grpc`
 
 Then add `PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/grpc/lib/pkgconfig"` 
 to your environment variables

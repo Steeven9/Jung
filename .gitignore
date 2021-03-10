@@ -16,6 +16,10 @@ jung_server
 *.aux
 *.toc
 *.out
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
 
 # System
 Thumbs.db
