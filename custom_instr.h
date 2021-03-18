@@ -28,6 +28,9 @@ using namespace std;
 
 extern ofstream log_p;
 
+/*
+	Writes the given string to the log file.
+*/
 extern void write_log(string msg);
 
 /*

@@ -29,6 +29,8 @@ Then, in another terminal, run the client
 
 `./jung_client`
 
+This will produce two files, `client_log.txt` and `server_log.txt`, that can be merged in a unique trace by running `./trace_merge`. This will in turn produce a unique `merged_log.txt` that contains the unified costs. This file can then be analyzed with `freud-statistics`.
+
 
 ## Running on another machine
 

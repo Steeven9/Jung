@@ -24,52 +24,49 @@
 
 #include "custom_instr.h"
 
+#define HUMAN_READABLE
+
 using namespace std;
 
 ofstream log_p;
 
 void write_log(string msg) {
 	// get current timestamp
-    int64_t timestamp = std::chrono::duration_cast<chrono::milliseconds>(
-		chrono::system_clock::now().time_since_epoch()).count();
+	#ifdef HUMAN_READABLE
+		time_t result = std::time(nullptr);
+		string timestamp = asctime(localtime(&result));
+		timestamp = timestamp.substr(0, timestamp.length() - 1); // get rid of null-terminator
+	#else
+    	int64_t timestamp = chrono::duration_cast<chrono::milliseconds>(
+			chrono::system_clock::now().time_since_epoch()).count();
+	#endif
 
 	log_p << "[" << timestamp << "] " << msg << endl;
 }
 
-/*
-	A custom malloc implementation that writes to the log
-	how much memory has been allocated.
-*/
 void* custom_malloc(string func_name, size_t size) {
 	void* ptr = malloc(size);
 	if (!ptr) {
 		cerr << "Cannot allocate memory" << endl;
 		exit(EXIT_FAILURE);
 	}
-	write_log(func_name + " Malloc " + to_string(size));
+	write_log(func_name + " mem=" + to_string(size));
 	return ptr;
 }
 
-/*
-	A custom free implementation that writes to the log
-	how much memory has been freed.
-*/
 void custom_free(string func_name, void* ptr) {
 	if (!ptr) {
 		cerr << "Cannot free memory" << endl;
 		exit(EXIT_FAILURE);
 	}
-	write_log(func_name + " Free");
+	write_log(func_name + " free");
 	free(ptr);
 }
 
-/*
-	Strart our custom instrumentation tracker.
-	Side is either "server" or "client".
-*/
 void start_instrum(string func_name, string side, int param) {
 	ios_base::openmode mode = ofstream::out;
 	if (side == "server") {
+		// append instead of overwrite
 		mode = ofstream::app;
 	}
 
@@ -83,11 +80,7 @@ void start_instrum(string func_name, string side, int param) {
 	write_log(msg);
 }
 
-/*
-	Stops the instrumentation.
-*/
 void finish_instrum(string func_name) {
 	write_log(func_name + " END");
 	log_p.close();
 }
-

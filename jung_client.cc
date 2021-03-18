@@ -67,6 +67,29 @@ class JungClient {
 			return reply;
 		}
 
+		JungReply ReturnDouble(const string& message) {
+			// Data we are sending to the server.
+			JungRequest request;
+			request.set_message(message);
+
+			// Container for the data we expect from the server.
+			JungReply reply;
+
+			// Context for the client. It could be used to convey extra information to
+			// the server and/or tweak certain RPC behaviors.
+			ClientContext context;
+
+			// The actual RPC.
+			Status status = stub_->ReturnDouble(&context, request, &reply);
+
+			// Act upon its status.
+			if (!status.ok()) {
+				cerr << "Error #" << status.error_code() << ": " << status.error_message() << endl;
+				exit(EXIT_FAILURE);
+			}
+			return reply;
+		}
+
 	private:
 		unique_ptr<Jung::Stub> stub_;
 };
@@ -84,7 +107,7 @@ void doStuff(string target_str, unsigned int param) {
 	// Allocate some memory so we can track it
 	custom_malloc("doStuff", param);
 
-	// Send the messages
+	// Send the "ciao" messages
 	for (int i = 0; i < param; ++i) {
 		string message("mamma " + to_string(i));
 		JungReply reply = jung.Greet(message);
@@ -93,7 +116,19 @@ void doStuff(string target_str, unsigned int param) {
 		cout << "Received: " << reply.message() << endl;
 
 		// Save the resulting id from the RPC call
-		write_log("doStuff RPC #" + to_string(reply.id()));
+		write_log("doStuff RPC=" + to_string(reply.id()));
+	}
+
+	// Send the double messages
+	for (int i = 0; i < param; ++i) {
+		string message(to_string(i));
+		JungReply reply = jung.ReturnDouble(message);
+
+		cout << "Sent: " << message << endl;
+		cout << "Received: " << reply.message() << endl;
+
+		// Save the resulting id from the RPC call
+		write_log("doStuff RPC=" + to_string(reply.id()));
 	}
 
 	finish_instrum("doStuff");

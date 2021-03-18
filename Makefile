@@ -33,7 +33,7 @@ PROTOS_PATH = protos
 
 vpath %.proto .
 
-all: system-check jung_client jung_server
+all: system-check jung_client jung_server trace_merge
 
 jung_client: jung.pb.o jung.grpc.pb.o jung_client.o custom_instr.o
 	$(CXX) $^ $(LDFLAGS) -o $@
@@ -50,7 +50,7 @@ jung_server: jung.pb.o jung.grpc.pb.o jung_server.o custom_instr.o
 	$(PROTOC) -I . --cpp_out=. $<
 
 clean:
-	rm -f *.o *.pb.cc *.pb.h jung_client jung_server *_log.txt
+	rm -f *.o *.pb.cc *.pb.h jung_client jung_server trace_merge *_log.txt
 
 
 # The following is to test your system and ensure a smoother experience.
