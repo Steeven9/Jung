@@ -99,7 +99,7 @@ class JungClient {
 	that should make the complexity scale.
 */
 void doStuff(string target_str, unsigned int param) {
-	start_instrum("doStuff", "client", param);
+	start_instrum("doStuff", "client", { make_feature("param", param) });
 
 	JungClient jung(grpc::CreateChannel(
 		target_str, grpc::InsecureChannelCredentials()));
@@ -110,25 +110,27 @@ void doStuff(string target_str, unsigned int param) {
 	// Send the "ciao" messages
 	for (int i = 0; i < param; ++i) {
 		string message("mamma " + to_string(i));
+		write_log("doStuff RPC START");
 		JungReply reply = jung.Greet(message);
 
 		cout << "Sent: " << message << endl;
 		cout << "Received: " << reply.message() << endl;
 
 		// Save the resulting id from the RPC call
-		write_log("doStuff RPC=" + to_string(reply.id()));
+		write_log("doStuff RPC=" + to_string(reply.id()) + " END");
 	}
 
 	// Send the double messages
 	for (int i = 0; i < param; ++i) {
 		string message(to_string(i));
+		write_log("doStuff RPC START");
 		JungReply reply = jung.ReturnDouble(message);
 
 		cout << "Sent: " << message << endl;
 		cout << "Received: " << reply.message() << endl;
 
 		// Save the resulting id from the RPC call
-		write_log("doStuff RPC=" + to_string(reply.id()));
+		write_log("doStuff RPC=" + to_string(reply.id()) + " END");
 	}
 
 	finish_instrum("doStuff");

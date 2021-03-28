@@ -48,7 +48,7 @@ int replyId = 0;
 class JungServiceImpl final : public Jung::Service {
 	Status Greet(ServerContext* context, const JungRequest* request,
 					JungReply* reply) override {
-		start_instrum("Greet=" + to_string(++replyId), "server", -1);
+		start_instrum("Greet=" + to_string(++replyId), "server", {});
 
 		string prefix("Ciao ");
 		reply->set_message(prefix + request->message());
@@ -63,7 +63,7 @@ class JungServiceImpl final : public Jung::Service {
 
 	Status ReturnDouble(ServerContext* context, const JungRequest* request,
 							JungReply* reply) override {
-		start_instrum("ReturnDouble=" + to_string(++replyId), "server", -1);
+		start_instrum("ReturnDouble=" + to_string(++replyId), "server", {});
 
 		reply->set_message(to_string(stoi(request->message()) * 2));
 		reply->set_id(replyId);

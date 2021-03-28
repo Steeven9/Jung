@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2021 gRPC authors and Stefano Taillefert.
+ * Copyright 2021 Stefano Taillefert.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@
 #include <stdlib.h>
 #include <chrono>
 #include <fstream>
+#include <vector>
 
 #include "custom_instr.h"
 
-#define HUMAN_READABLE
+// Uncomment to get a full text timestamp instead of ms
+//#define HUMAN_READABLE
 
 using namespace std;
 
@@ -63,7 +65,8 @@ void custom_free(string func_name, void* ptr) {
 	free(ptr);
 }
 
-void start_instrum(string func_name, string side, int param) {
+void start_instrum(string func_name, string side,
+ const vector<basic_feature*> & feature_list) {
 	ios_base::openmode mode = ofstream::out;
 	if (side == "server") {
 		// append instead of overwrite
@@ -73,8 +76,9 @@ void start_instrum(string func_name, string side, int param) {
 	log_p.open(side + "_log.txt", mode);
 
 	string msg = func_name + " START";
-	if (param != -1) {
-		msg += " param=" + to_string(param);
+	for (auto f : feature_list) {
+		msg += " ";
+		msg += f->print();
 	}
 
 	write_log(msg);

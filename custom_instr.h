@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2021 gRPC authors and Stefano Taillefert.
+ * Copyright 2021 Stefano Taillefert.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,30 @@
 #ifndef custom_instr
 #define custom_instr
 
-#include <string>
-#include <stdlib.h>
-#include <chrono>
-#include <fstream>
-
 using namespace std;
+
+class basic_feature {
+public:
+    virtual string print() const = 0;
+};
+
+template <class T>
+struct feature : public basic_feature {
+    string name;
+    T value;
+
+    feature(const string & n, const T & v)
+	: name(n), value(v) {};
+
+    virtual string print() const {
+		return name + "=" + to_string(value);
+    }
+};
+
+template <class T>
+feature<T> * make_feature(const string & n, const T & v) {
+    return new feature<T>(n, v);
+}
 
 extern ofstream log_p;
 
@@ -49,7 +67,8 @@ extern void custom_free(string func_name, void* ptr);
 	Strart our custom instrumentation tracker.
 	Side is either "server" or "client".
 */
-extern void start_instrum(string func_name, string side, int param);
+extern void start_instrum(string func_name, string side, 
+ const vector<basic_feature*> & feature_list);
 
 /*
 	Stops the instrumentation.

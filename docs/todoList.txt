@@ -12,7 +12,9 @@ Done so far
 ---------------------
 TODO for next step
 
-- improve performace traces
+- improve performace traces format to make it compatible with freud-statistics
+- improve instrumentation functions to pass feature object (key/value)
+- develop a reader tool to "decrypt" the traces (with flag for human-readable stamps) [non-essential]
 - develop a tool to merge the performance logs from client and server
 - start on the report template
 
