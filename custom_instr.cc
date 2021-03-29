@@ -43,7 +43,7 @@ void write_log(string msg) {
 			chrono::system_clock::now().time_since_epoch()).count();
 	#endif
 
-	log_p << "[" << timestamp << "] " << msg << endl;
+	log_p << timestamp << " " + msg << endl;
 }
 
 void* custom_malloc(string func_name, size_t size) {

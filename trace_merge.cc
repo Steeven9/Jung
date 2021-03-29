@@ -17,9 +17,15 @@
  */
 
 #include <fstream>
+#include <iostream>
 
 using namespace std;
 
+/* 
+    Read a line from the client log, then if there
+    is a RPC request, search the relevant data in the
+    server log and append it.
+*/
 int main() {
     ifstream client_log;
     ifstream server_log;
@@ -29,7 +35,32 @@ int main() {
     server_log.open("server_log.txt");
     merged_log.open("merged_log.txt");
 
-    // TODO check that the log is in the correct format
+    if (!client_log.is_open()) {
+        cerr << "Cannot open client log" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    if (!server_log.is_open()) {
+        cerr << "Cannot open server log" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    if (!merged_log.is_open()) {
+        cerr << "Cannot write merged log" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    string line;
+    while(getline(client_log, line)) {
+        merged_log << line << endl;
+        // If RPC request, add server data
+        if (line.find("RPC START") != string::npos) {
+            getline(server_log, line);
+            merged_log << line + " (server)" << endl;
+            getline(server_log, line);
+            merged_log << line + " (server)" << endl;
+        }
+    }
 
     client_log.close();
     server_log.close();
