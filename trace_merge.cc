@@ -24,7 +24,7 @@
 
 using namespace std;
 
-struct function {
+struct custom_func {
     string name;
     int exec_time;
     int network_time;
@@ -33,7 +33,7 @@ struct function {
     int server_memory;
     const vector<basic_feature*> & feature_list;
 
-    function(const string & n, const vector<basic_feature*> & f_l)
+    custom_func(const string & n, const vector<basic_feature*> & f_l)
 	: name(n), feature_list(f_l) {};
 
     virtual string print() const {
@@ -53,8 +53,8 @@ struct function {
 };
 
 
-function * make_function(const string & n, const vector<basic_feature*> & f_l) {
-    return new function(n, f_l);
+custom_func * make_custom_func(const string & n, const vector<basic_feature*> & f_l) {
+    return new custom_func(n, f_l);
 }
 
 /* 
