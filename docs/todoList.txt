@@ -22,6 +22,7 @@ TODO for next step
 TODO for long-term
 
 - integrate said unified trace in the existing statistics tool (freud-statistics)
+- dockerize the server to easily have it running permanently
 - identify some third-party non-trivial distributed applications and analyze them
 - write the report, prepare the poster and presentation 
 - have a pizza

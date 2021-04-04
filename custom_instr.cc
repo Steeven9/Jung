@@ -75,6 +75,11 @@ void start_instrum(string func_name, string side,
 
 	log_p.open(side + "_log.txt", mode);
 
+	if (!log_p.is_open()) {
+        cerr << "Error: cannot open log" << endl;
+        exit(EXIT_FAILURE);
+    }
+
 	string msg = func_name + " START";
 	for (auto f : feature_list) {
 		msg += " ";

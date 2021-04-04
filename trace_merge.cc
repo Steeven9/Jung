@@ -62,6 +62,8 @@ int main() {
         }
     }
 
+    cout << "Merge completed successfully" << endl;
+
     client_log.close();
     server_log.close();
     merged_log.close();
