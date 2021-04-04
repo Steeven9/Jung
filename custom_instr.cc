@@ -49,16 +49,16 @@ void write_log(string msg) {
 void* custom_malloc(string func_name, size_t size) {
 	void* ptr = malloc(size);
 	if (!ptr) {
-		cerr << "Cannot allocate memory" << endl;
+		cerr << "Error: cannot allocate memory" << endl;
 		exit(EXIT_FAILURE);
 	}
-	write_log(func_name + " mem=" + to_string(size));
+	write_log(func_name + " malloc=" + to_string(size));
 	return ptr;
 }
 
 void custom_free(string func_name, void* ptr) {
 	if (!ptr) {
-		cerr << "Cannot free memory" << endl;
+		cerr << "Error: cannot free memory" << endl;
 		exit(EXIT_FAILURE);
 	}
 	write_log(func_name + " free");
@@ -76,7 +76,7 @@ void start_instrum(string func_name, string side,
 	log_p.open(side + "_log.txt", mode);
 
 	if (!log_p.is_open()) {
-        cerr << "Error: cannot open log" << endl;
+        cerr << "Error: cannot open " << side << " log" << endl;
         exit(EXIT_FAILURE);
     }
 

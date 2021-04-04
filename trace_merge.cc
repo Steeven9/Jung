@@ -18,8 +18,44 @@
 
 #include <fstream>
 #include <iostream>
+#include <vector>
+
+#include "custom_instr.h"
 
 using namespace std;
+
+struct function {
+    string name;
+    int exec_time;
+    int network_time;
+    int server_time;
+    int memory_usage;
+    int server_memory;
+    const vector<basic_feature*> & feature_list;
+
+    function(const string & n, const vector<basic_feature*> & f_l)
+	: name(n), feature_list(f_l) {};
+
+    virtual string print() const {
+		return name + " took " + to_string(exec_time) + "ms, of which " + 
+            to_string(network_time) + "ms in network and " + to_string(server_time) + 
+            " in server. Used " + to_string(memory_usage) + " memory client-side and " + 
+            to_string(server_memory) + " memory server-side.";
+    }
+
+    virtual void addTime(int t) {
+        exec_time += t;
+    }
+
+    virtual void addServerTime(int t) {
+        server_time += t;
+    }
+};
+
+
+function * make_function(const string & n, const vector<basic_feature*> & f_l) {
+    return new function(n, f_l);
+}
 
 /* 
     Read a line from the client log, then if there
@@ -36,17 +72,17 @@ int main() {
     merged_log.open("merged_log.txt");
 
     if (!client_log.is_open()) {
-        cerr << "Cannot open client log" << endl;
+        cerr << "Error: cannot open client log" << endl;
         exit(EXIT_FAILURE);
     }
 
     if (!server_log.is_open()) {
-        cerr << "Cannot open server log" << endl;
+        cerr << "Error: cannot open server log" << endl;
         exit(EXIT_FAILURE);
     }
 
     if (!merged_log.is_open()) {
-        cerr << "Cannot write merged log" << endl;
+        cerr << "Error: cannot write merged log" << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -56,9 +92,9 @@ int main() {
         // If RPC request, add server data
         if (line.find("RPC START") != string::npos) {
             getline(server_log, line);
-            merged_log << line + " (server)" << endl;
+            merged_log << line + " [server]" << endl;
             getline(server_log, line);
-            merged_log << line + " (server)" << endl;
+            merged_log << line + " [server]" << endl;
         }
     }
 

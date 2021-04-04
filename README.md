@@ -34,7 +34,7 @@ This will produce two files, `client_log.txt` and `server_log.txt`, that can be 
 
 ## Docker
 
-A server Docker image is available. You can build it with `docker build -t jung ./` and then run it e.g. with `docker run -d -p 50051:50051 -v ~/Jung:/usr/Jung --name jung jung` or simply get it from Docker Hub under `steeven9/jung`.
+A server Docker image is available. You can build it with `docker build -t jung ./` and then run it e.g. with `docker run -d -p 50051:50051 -v ~/Jung:/usr/Jung --name jung jung` or simply get it from [Docker Hub](https://hub.docker.com/repository/docker/steeven9/jung).
 
 
 ## Running on another machine

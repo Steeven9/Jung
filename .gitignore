@@ -3,6 +3,9 @@
 pin/
 *_log.txt
 
+# MS Office
+~$*
+
 # Compilation output
 cmake/
 jung_client

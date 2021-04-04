@@ -48,11 +48,10 @@ int replyId = 0;
 class JungServiceImpl final : public Jung::Service {
 	Status Greet(ServerContext* context, const JungRequest* request,
 					JungReply* reply) override {
-		start_instrum("Greet=" + to_string(++replyId), "server", {});
+		start_instrum("Greet", "server", { make_feature("message_len", request->message().length()) });
 
-		string prefix("Ciao ");
-		reply->set_message(prefix + request->message());
-		reply->set_id(replyId);
+		reply->set_message("Ciao " + request->message());
+		reply->set_id(++replyId);
 
 		if (VERBOSE == 1) {
 			cout << "Received Greet req #" << replyId << ": " << request->message() << endl;
@@ -63,10 +62,10 @@ class JungServiceImpl final : public Jung::Service {
 
 	Status ReturnDouble(ServerContext* context, const JungRequest* request,
 							JungReply* reply) override {
-		start_instrum("ReturnDouble=" + to_string(++replyId), "server", {});
+		start_instrum("ReturnDouble", "server", { make_feature("d", stoi(request->message())) });
 
 		reply->set_message(to_string(stoi(request->message()) * 2));
-		reply->set_id(replyId);
+		reply->set_id(++replyId);
 
 		if (VERBOSE == 1) {
 			cout << "Received ReturnDouble req #" << replyId << ": " << request->message() << endl;
