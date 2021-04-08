@@ -67,6 +67,8 @@ class JungServiceImpl final : public Jung::Service {
 		reply->set_message(to_string(stoi(request->message()) * 2));
 		reply->set_id(++replyId);
 
+		custom_malloc(__func__, stoi(request->message()));
+
 		if (VERBOSE == 1) {
 			cout << "Received ReturnDouble req #" << replyId << ": " << request->message() << endl;
 		}

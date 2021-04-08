@@ -52,7 +52,7 @@ void* custom_malloc(string func_name, size_t size) {
 		cerr << "Error: cannot allocate memory" << endl;
 		exit(EXIT_FAILURE);
 	}
-	write_log(func_name + " malloc=" + to_string(size));
+	write_log(func_name + " malloc " + to_string(size));
 	return ptr;
 }
 
@@ -80,7 +80,7 @@ void start_instrum(string func_name, string side,
         exit(EXIT_FAILURE);
     }
 
-	string msg = func_name + " START";
+	string msg = func_name + " FUNC_START";
 	for (auto f : feature_list) {
 		msg += " ";
 		msg += f->print();
@@ -90,6 +90,6 @@ void start_instrum(string func_name, string side,
 }
 
 void finish_instrum(string func_name) {
-	write_log(func_name + " END");
+	write_log(func_name + " FUNC_END");
 	log_p.close();
 }

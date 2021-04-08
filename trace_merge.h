@@ -28,21 +28,33 @@ using namespace std;
 
 struct custom_func {
     string name;
-    int exec_time;
-    int network_time;
-    int server_time;
+    long exec_time;
+    long network_time;
+    long server_time;
     int memory_usage;
     int server_memory;
+    int mem_leaks;
     const vector<basic_feature*> & feature_list;
 
     custom_func(const string & n, const vector<basic_feature*> & f_l)
 	: name(n), feature_list(f_l) {};
 
     virtual string print() const {
-		return name + " took " + to_string(exec_time) + "ms, of which " + 
+        string msg = name + " took " + to_string(exec_time) + "ms, of which " + 
             to_string(network_time) + "ms in network and " + to_string(server_time) + 
-            " in server. Used " + to_string(memory_usage) + " memory client-side and " + 
-            to_string(server_memory) + " memory server-side.";
+            "ms in server. Used " + to_string(memory_usage) + " memory client-side and " + 
+            to_string(server_memory) + " memory server-side.\n";
+
+        if (mem_leaks > 0) {
+            msg += "Memory leaks detected! " + to_string(mem_leaks) + " malloc calls not freed.\n";
+        }
+
+        msg += "Features: ";
+        for (auto f : feature_list) {
+            msg += f->print();
+        }
+
+        return msg;
     }
 
     virtual void addTime(int t) {

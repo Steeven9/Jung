@@ -35,6 +35,7 @@ struct feature : public basic_feature {
 	: name(n), value(v) {};
 
     virtual string print() const {
+		//TODO don't crash on strings
 		return name + "=" + to_string(value);
     }
 };
@@ -48,6 +49,9 @@ extern ofstream log_p;
 
 /*
 	Writes the given string to the log file.
+	Format:  timestamp function_name event [params]
+	Example: 1617884165196 doStuff RPC_start
+	Example: 1617884165196 doStuff malloc 10
 */
 extern void write_log(string msg);
 

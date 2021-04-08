@@ -7,13 +7,12 @@ A tool for Instrumentation and Performance Analysis of Distributed Systems based
 ## Install gRPC and protobuf
 
 ### Linux
-`sudo apt install protobuf-compiler-grpc libgrpc-dev libgrpc++-dev`
+`apt install protobuf-compiler-grpc libgrpc-dev libgrpc++-dev`
 
 ### macOS
 `brew install grpc`
 
-Then add `PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/grpc/lib/pkgconfig"` 
-to your environment variables
+`export PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/grpc/lib/pkgconfig:$PKG_CONFIG_PATH`
 
 ### Windows
 Get a Linux VM
