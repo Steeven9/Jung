@@ -25,6 +25,7 @@
 
 #include "jung.grpc.pb.h"
 #include "custom_instr.h"
+#include "trace_merge.h"
 
 #define SERVER_PORT 50051
 #define NUM_MSG 10
@@ -37,6 +38,8 @@ using jung::JungReply;
 using jung::Jung;
 
 using namespace std;
+
+string server_address = "localhost:" + to_string(SERVER_PORT);
 
 class JungClient {
 	public:
@@ -98,11 +101,11 @@ class JungClient {
 	The function to be analyzed. Takes an int parameter
 	that should make the complexity scale.
 */
-void doStuff(string target_str, unsigned int param) {
-	start_instrum("doStuff", "client", { make_feature("param", param) });
+void doStuff(unsigned int param) {
+	start_instrum(__func__, "client", { make_feature("param", param) });
 
 	JungClient jung(grpc::CreateChannel(
-		target_str, grpc::InsecureChannelCredentials()));
+		server_address, grpc::InsecureChannelCredentials()));
 
 	// Allocate some memory so we can track it
 	custom_malloc("doStuff", param);
@@ -142,7 +145,6 @@ int main(int argc, char** argv) {
 	// the argument "--target=" which is the only expected argument.
 	// We indicate that the channel isn't authenticated (use of
 	// InsecureChannelCredentials()).
-	string target_str;
 	string arg_str("--target");
 
 	if (argc > 1) {
@@ -153,14 +155,12 @@ int main(int argc, char** argv) {
 			start_pos += arg_str.size();
 
 			if (arg_val[start_pos] == '=') {
-				target_str = arg_val.substr(start_pos + 1);
+				server_address = arg_val.substr(start_pos + 1);
 
 				// Add default port if not explicitly passed
-				if (target_str.find(":") == string::npos) {
-					target_str += ":" + to_string(SERVER_PORT);
+				if (server_address.find(":") == string::npos) {
+					server_address += ":" + to_string(SERVER_PORT);
 				}
-
-				cout << "Connecting to " << target_str << endl;
 			} else {
 				cout << "The only correct argument syntax is --target=" << endl;
 				return 0;
@@ -169,11 +169,16 @@ int main(int argc, char** argv) {
 			cout << "The only acceptable argument is --target=" << endl;
 			return 0;
 		}
-	} else {
-		target_str = "localhost:" + to_string(SERVER_PORT);
 	}
 
-	doStuff(target_str, NUM_MSG);
+	cout << "Connecting to " << server_address << "..." << endl;
+
+	cout << "Starting RPC..." << endl;
+	doStuff(NUM_MSG);
+
+	//TODO make linker happy
+	//cout << "Merging performance traces..." << endl;
+	//merge_traces();
 
 	return 0;
 }

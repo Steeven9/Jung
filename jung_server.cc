@@ -48,7 +48,7 @@ int replyId = 0;
 class JungServiceImpl final : public Jung::Service {
 	Status Greet(ServerContext* context, const JungRequest* request,
 					JungReply* reply) override {
-		start_instrum("Greet", "server", { make_feature("message_len", request->message().length()) });
+		start_instrum(__func__, "server", { make_feature("msg_len", request->message().length()) });
 
 		reply->set_message("Ciao " + request->message());
 		reply->set_id(++replyId);
@@ -62,7 +62,7 @@ class JungServiceImpl final : public Jung::Service {
 
 	Status ReturnDouble(ServerContext* context, const JungRequest* request,
 							JungReply* reply) override {
-		start_instrum("ReturnDouble", "server", { make_feature("d", stoi(request->message())) });
+		start_instrum(__func__, "server", { make_feature("d", stoi(request->message())) });
 
 		reply->set_message(to_string(stoi(request->message()) * 2));
 		reply->set_id(++replyId);

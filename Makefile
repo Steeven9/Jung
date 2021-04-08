@@ -19,7 +19,6 @@ SYSTEM ?= $(HOST_SYSTEM)
 GRPC_LDFLAGS := $(shell pkg-config --libs protobuf grpc++)
 GRPC_CFLAGS := $(shell pkg-config --cflags protobuf grpc++)
 
-
 CXX = g++
 CPPFLAGS += $(GRPC_CFLAGS)
 CXXFLAGS += -std=c++11
@@ -28,8 +27,6 @@ LDFLAGS = $(GRPC_LDFLAGS) -lgrpc++_reflection -ldl
 PROTOC = protoc
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= $(shell which $(GRPC_CPP_PLUGIN))
-
-PROTOS_PATH = protos
 
 vpath %.proto .
 
