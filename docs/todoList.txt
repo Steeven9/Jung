@@ -8,12 +8,13 @@ Done so far
 - produce performance traces (txt files with timestamps)
 - associate server-side executions with an ID to send to the client
 - optimize compilation and installation, add cross-platform instructions
+- dockerize the server to easily have it running permanently [non-essential]
+- improve instrumentation functions to pass feature object (key/value)
 
 ---------------------
 TODO for next step
 
 - improve performace traces format to make it compatible with freud-statistics
-- improve instrumentation functions to pass feature object (key/value)
 - develop a reader tool to "decrypt" the traces (with flag for human-readable stamps) [non-essential]
 - develop a tool to merge the performance logs from client and server
 - start on the report template
@@ -21,8 +22,6 @@ TODO for next step
 ---------------------
 TODO for long-term
 
-- integrate said unified trace in the existing statistics tool (freud-statistics)
-- dockerize the server to easily have it running permanently [non-essential]
 - identify some third-party non-trivial distributed applications and analyze them
 - write the report, prepare the poster and presentation 
 - have a pizza
@@ -30,5 +29,4 @@ TODO for long-term
 ---------------------
 TODO in the next meeting
 
-- see new assignment (deadline: apr 11) with tasks list and graph
-- check on improved instrumentation and merge tool prototype
+- check on improved merge tool
