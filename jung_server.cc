@@ -42,46 +42,50 @@ using jung::Jung;
 using namespace std;
 
 // Global counter for IDs
-int replyId = 0;
+int reply_id = 0;
 
 // Logic and data behind the server's behavior.
 class JungServiceImpl final : public Jung::Service {
 	Status Greet(ServerContext* context, const JungRequest* request,
 					JungReply* reply) override {
-		start_instrum("Greet " + to_string(++replyId), "server", { make_feature("msg_len", request->message().length()) });
+		string func_name =  __func__;
+		func_name += " " + to_string(++reply_id);
+		start_instrum(func_name, "server", { make_feature("msg_len", request->message().length()) });
 
 		reply->set_message("Ciao " + request->message());
-		reply->set_id(replyId);
+		reply->set_id(reply_id);
 
 		if (VERBOSE == 1) {
-			cout << "Received Greet req #" << replyId << ": " << request->message() << endl;
+			cout << "Received " << func_name << ": " << request->message() << endl;
 		}
-		finish_instrum("Greet " + to_string(replyId));
+		finish_instrum(func_name);
 		return Status::OK;
 	}
 
 	Status ReturnDouble(ServerContext* context, const JungRequest* request,
 							JungReply* reply) override {
-		start_instrum("ReturnDouble " + to_string(++replyId), "server", { make_feature("d", stoi(request->message())) });
+		string func_name =  __func__;
+		func_name += " " + to_string(++reply_id);
+		start_instrum(func_name, "server", { make_feature("d", stoi(request->message())) });
 
 		reply->set_message(to_string(stoi(request->message()) * 2));
-		reply->set_id(replyId);
+		reply->set_id(reply_id);
 
-		custom_malloc(__func__, stoi(request->message()));
+		custom_malloc(func_name, stoi(request->message()));
 
 		if (VERBOSE == 1) {
-			cout << "Received ReturnDouble req #" << replyId << ": " << request->message() << endl;
+			cout << "Received " << func_name << ": " << request->message() << endl;
 		}
 
-		// simulate a computation by sleeping for the given seconds
-		this_thread::sleep_for(chrono::seconds(stoi(request->message())));
+		// simulate a computation by sleeping for the given seconds / 2
+		this_thread::sleep_for(chrono::seconds(stoi(request->message()) / 2));
 
-		finish_instrum("ReturnDouble " + to_string(replyId));
+		finish_instrum(func_name);
 		return Status::OK;
 	}
 };
 
-void RunServer() {
+void run_server() {
 	string server_address("0.0.0.0:" + to_string(SERVER_PORT));
 	JungServiceImpl service;
 
@@ -103,7 +107,7 @@ void RunServer() {
 }
 
 int main(int argc, char** argv) {
-	RunServer();
+	run_server();
 
 	return 0;
 }

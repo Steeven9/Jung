@@ -16,36 +16,41 @@
  *
  */
 
-#ifndef custom_instr
-#define custom_instr
+#ifndef CUSTOM_INSTR_H_INCLUDED
+#define CUSTOM_INSTR_H_INCLUDED
 
-using namespace std;
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 
 class basic_feature {
 public:
-    virtual string print() const = 0;
+    virtual std::string print() const = 0;
 };
 
 template <class T>
 struct feature : public basic_feature {
-    string name;
+    std::string name;
     T value;
 
-    feature(const string & n, const T & v)
+    feature(const std::string & n, const T & v)
 	: name(n), value(v) {};
 
-    virtual string print() const {
-		//TODO don't crash on strings
-		return name + "=" + to_string(value);
+    virtual std::string print() const {
+		std::ostringstream output;
+    	output << name << "=" << value;
+		return output.str();
     }
 };
 
 template <class T>
-feature<T> * make_feature(const string & n, const T & v) {
+feature<T> * make_feature(const std::string & n, const T & v) {
     return new feature<T>(n, v);
 }
 
-extern ofstream log_p;
+extern std::ofstream log_p;
 
 /*
 	Writes the given string to the log file.
@@ -53,30 +58,30 @@ extern ofstream log_p;
 	Example: 1617884165196 doStuff RPC_start
 	Example: 1617884165196 doStuff malloc 10
 */
-extern void write_log(string msg);
+extern void write_log(std::string msg);
 
 /*
 	A custom malloc implementation that writes to the log
 	how much memory has been allocated.
 */
-extern void* custom_malloc(string func_name, size_t size);
+extern void* custom_malloc(std::string func_name, size_t size);
 
 /*
 	A custom free implementation that writes to the log
 	how much memory has been freed.
 */
-extern void custom_free(string func_name, void* ptr);
+extern void custom_free(std::string func_name, void* ptr);
 
 /*
 	Strart our custom instrumentation tracker.
 	Side is either "server" or "client".
 */
-extern void start_instrum(string func_name, string side, 
- const vector<basic_feature*> & feature_list);
+extern void start_instrum(std::string func_name, std::string side, 
+ const std::vector<basic_feature*> & feature_list);
 
 /*
 	Stops the instrumentation.
 */
-extern void finish_instrum(string func_name);
+extern void finish_instrum(std::string func_name);
 
 #endif

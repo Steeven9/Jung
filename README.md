@@ -28,12 +28,12 @@ Then, in another terminal, run the client
 
 `./jung_client`
 
-This will produce two files, `client_log.txt` and `server_log.txt`, that can be merged in a unique trace by running `./trace_merge`. This will in turn produce a unique `merged_log.txt` that contains the unified costs. This file can then be analyzed with `freud-statistics`.
+This will produce two files, `client_log.txt` and `server_log.txt`, that can be merged in a unique trace by running `./trace_merge`. This will in turn produce a unique `trace_log.txt` that contains the unified costs. Alternatively, by passing `--simple` to `trace_merge`, a simple merged log (`merged_log.txt`) can be optained instead of the summary.
 
 
 ## Docker
 
-A server Docker image is available. You can build it with `docker build -t jung ./` and then run it e.g. with `docker run -d -p 50051:50051 -v ~/Jung:/usr/Jung --name jung jung` or simply get it from [Docker Hub](https://hub.docker.com/repository/docker/steeven9/jung).
+A server Docker image is available. You can build it with `docker build -t jung ./` and then run it e.g. with `docker run -d -p 50051:50051 -v ~/Jung:/usr/Jung --name jung jung` or simply get it from [Docker Hub](https://hub.docker.com/repository/docker/steeven9/jung) and run it in the same way.
 
 
 ## Running on another machine

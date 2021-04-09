@@ -16,41 +16,44 @@
  *
  */
 
-#ifndef trace_merge
-#define trace_merge
+#ifndef TRACE_MERGE_H_INCLUDED
+#define TRACE_MERGE_H_INCLUDED
 
 #include <string>
 #include <vector>
 
 #include "custom_instr.h"
 
-using namespace std;
-
 struct custom_func {
-    string name;
+    std::string name;
     long exec_time = 0;
     long network_time = 0;
     long server_time = 0;
     int memory_usage = 0;
     int server_memory = 0;
     int mem_leaks = 0;
-    const vector<basic_feature*> & feature_list;
+    int server_memory_leaks = 0;
+    const std::vector<basic_feature*> & feature_list;
 
-    custom_func(const string & n, const vector<basic_feature*> & f_l)
+    custom_func(const std::string & n, const std::vector<basic_feature*> & f_l)
 	: name(n), feature_list(f_l) {};
 
-    virtual string print() const {
-        string msg = name + " took " + to_string(exec_time) + "ms, of which " + 
-            to_string(network_time) + "ms in network and " + to_string(server_time) + 
-            "ms in server. Used " + to_string(memory_usage) + " memory client-side and " + 
-            to_string(server_memory) + " memory server-side.\n";
+    virtual std::string print() const {
+        std::string msg = name + " took " + std::to_string(exec_time) + "ms, of which " + 
+            std::to_string(network_time) + "ms in network and " + std::to_string(server_time) + 
+            "ms in server.\nUsed " + std::to_string(memory_usage) + " bytes of memory client-side and " + 
+            std::to_string(server_memory) + " bytes of memory server-side.";
 
         if (mem_leaks > 0) {
-            msg += "Memory leaks detected! " + to_string(mem_leaks) + " malloc call(s) not freed client-side.\n";
+            msg += "\nPossible client memory leak detected! " + std::to_string(mem_leaks) + " malloc call(s) not freed.";
+        }
+
+        if (server_memory_leaks > 0) {
+            msg += "\nPossible server memory leak detected! " + std::to_string(server_memory_leaks) + " malloc call(s) not freed.";
         }
 
         if (feature_list.size() > 0) {
-            msg += "Found " + to_string(feature_list.size()) + " feature(s): ";
+            msg += "\nFound " + std::to_string(feature_list.size()) + " feature(s): ";
             for (auto f : feature_list) {
                 msg += f->print();
             }
@@ -61,7 +64,7 @@ struct custom_func {
 };
 
 
-custom_func * make_custom_func(const string & n, const vector<basic_feature*> & f_l) {
+custom_func * make_custom_func(const std::string & n, const std::vector<basic_feature*> & f_l) {
     return new custom_func(n, f_l);
 }
 

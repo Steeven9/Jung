@@ -19,6 +19,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <string.h>
 
 #include "trace_merge.h"
 
@@ -42,6 +43,8 @@ long calc_server_time(string RPC_id) {
     string line;
     while(getline(server_log, line)) {
         if (line.find(RPC_id + " FUNC_START") != string::npos) {
+            //TODO skip eventual malloc lines
+            //TODO preprocess log file and save indices?
             long start_time = stol(line.substr(0, line.find(" ")));
             getline(server_log, line);
             result = stol(line.substr(0, line.find(" "))) - start_time;
@@ -70,7 +73,7 @@ long calc_server_memory(string RPC_id) {
     string line;
     while(getline(server_log, line)) {
         if (line.find(RPC_id + " malloc") != string::npos) {
-            //TODO actually get the correct amount of memory and not 2x
+            //TODO actually get the correct amount of memory
             result = stol(line.substr(line.find("malloc ") + 7));
         }
     }
@@ -149,10 +152,9 @@ void generate_perf_trace() {
 
         //RPC start
         if (line_vect[2] == "RPC_start") {
-            //TODO network time, server time, server memory usage
+            //TODO network time, server time, server memory usage, server mem leaks
 
             RPC_start_time = stol(line_vect[0]);
-            func->server_memory += calc_server_memory(line_vect[3]);
         }
 
         //RPC end
@@ -163,6 +165,7 @@ void generate_perf_trace() {
 
             func->server_time += server_time;
             func->network_time += stol(line_vect[0]) - RPC_start_time - server_time;
+            func->server_memory += calc_server_memory(line_vect[3]);
         }
 
         //Function end - done
@@ -230,8 +233,11 @@ void simple_merge() {
     merged_log.close();
 }
 
-int main(int argc, char** argv) {
-    //TODO fix the id lookup if server log is already started
-    //simple_merge();
-    generate_perf_trace();
+int main(int argc, char** argv) {    
+    if (argc > 1 && strcmp(argv[1], "--simple") == 0) {
+        //TODO fix the id lookup if server log is already started
+        simple_merge();
+    } else {
+        generate_perf_trace();
+    }    
 }

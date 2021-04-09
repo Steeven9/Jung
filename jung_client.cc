@@ -176,9 +176,5 @@ int main(int argc, char** argv) {
 	cout << "Starting RPC..." << endl;
 	doStuff(NUM_MSG);
 
-	//TODO make linker happy
-	//cout << "Merging performance traces..." << endl;
-	//generate_perf_trace();
-
 	return 0;
 }

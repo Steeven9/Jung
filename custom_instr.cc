@@ -26,11 +26,13 @@
 #include "custom_instr.h"
 
 // Uncomment to get a full text timestamp instead of ms
+// WARNING: WILL BREAK THE MERGER, DEBUG ONLY
 //#define HUMAN_READABLE
 
 using namespace std;
 
 ofstream log_p;
+//TODO add precise custom timer (chrono::steady_clock) in ns
 
 void write_log(string msg) {
 	// get current timestamp
