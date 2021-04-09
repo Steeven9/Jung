@@ -48,24 +48,24 @@ int replyId = 0;
 class JungServiceImpl final : public Jung::Service {
 	Status Greet(ServerContext* context, const JungRequest* request,
 					JungReply* reply) override {
-		start_instrum(__func__, "server", { make_feature("msg_len", request->message().length()) });
+		start_instrum("Greet " + to_string(++replyId), "server", { make_feature("msg_len", request->message().length()) });
 
 		reply->set_message("Ciao " + request->message());
-		reply->set_id(++replyId);
+		reply->set_id(replyId);
 
 		if (VERBOSE == 1) {
 			cout << "Received Greet req #" << replyId << ": " << request->message() << endl;
 		}
-		finish_instrum("Greet");
+		finish_instrum("Greet " + to_string(replyId));
 		return Status::OK;
 	}
 
 	Status ReturnDouble(ServerContext* context, const JungRequest* request,
 							JungReply* reply) override {
-		start_instrum(__func__, "server", { make_feature("d", stoi(request->message())) });
+		start_instrum("ReturnDouble " + to_string(++replyId), "server", { make_feature("d", stoi(request->message())) });
 
 		reply->set_message(to_string(stoi(request->message()) * 2));
-		reply->set_id(++replyId);
+		reply->set_id(replyId);
 
 		custom_malloc(__func__, stoi(request->message()));
 
@@ -76,7 +76,7 @@ class JungServiceImpl final : public Jung::Service {
 		// simulate a computation by sleeping for the given seconds
 		this_thread::sleep_for(chrono::seconds(stoi(request->message())));
 
-		finish_instrum("ReturnDouble");
+		finish_instrum("ReturnDouble " + to_string(replyId));
 		return Status::OK;
 	}
 };

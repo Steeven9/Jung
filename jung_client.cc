@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
 
 	//TODO make linker happy
 	//cout << "Merging performance traces..." << endl;
-	//merge_traces();
+	//generate_perf_trace();
 
 	return 0;
 }
