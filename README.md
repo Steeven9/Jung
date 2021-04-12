@@ -1,4 +1,9 @@
 # Jung
+![](https://img.shields.io/github/license/steeven9/jung)
+![](https://img.shields.io/docker/cloud/automated/steeven9/jung)
+![](https://img.shields.io/docker/cloud/build/steeven9/jung)
+![](https://img.shields.io/tokei/lines/github/steeven9/jung)
+
 Bachelor Project at USI, Lugano.
 
 A tool for Instrumentation and Performance Analysis of Distributed Systems based on [Freud](https://github.com/usi-systems/freud) and [gRPC](https://grpc.io).
