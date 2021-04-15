@@ -20,6 +20,8 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <filesystem>
+#include <stdio.h>
 
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/health_check_service_interface.h>
@@ -29,7 +31,8 @@
 #include "custom_instr.h"
 
 #define SERVER_PORT 50051
-#define VERBOSE 1
+#define VERBOSE true
+#define CLEAR_LOG true
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -55,7 +58,7 @@ class JungServiceImpl final : public Jung::Service {
 		reply->set_message("Ciao " + request->message());
 		reply->set_id(reply_id);
 
-		if (VERBOSE == 1) {
+		if (VERBOSE) {
 			cout << "Received " << func_name << ": " << request->message() << endl;
 		}
 		finish_instrum(func_name);
@@ -73,7 +76,7 @@ class JungServiceImpl final : public Jung::Service {
 
 		custom_malloc(func_name, stoi(request->message()));
 
-		if (VERBOSE == 1) {
+		if (VERBOSE) {
 			cout << "Received " << func_name << ": " << request->message() << endl;
 		}
 
@@ -107,6 +110,10 @@ void run_server() {
 }
 
 int main(int argc, char** argv) {
+	if (filesystem::exists(SERVER_LOGFILE) && CLEAR_LOG) {
+		remove(SERVER_LOGFILE);
+	}
+
 	run_server();
 
 	return 0;

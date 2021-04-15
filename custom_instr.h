@@ -25,6 +25,11 @@
 #include <sstream>
 #include <vector>
 
+#define SERVER_LOGFILE "server_log.txt"
+#define CLIENT_LOGFILE "client_log.txt"
+#define TRACE_LOGFILE  "trace_log.txt"
+#define MERGED_LOGFILE "merged_log.txt"
+
 class basic_feature {
 public:
     virtual std::string print() const = 0;
@@ -54,9 +59,9 @@ extern std::ofstream log_p;
 
 /*
 	Writes the given string to the log file.
-	Format:  timestamp function_name event [params]
-	Example: 1617884165196 doStuff RPC_start
-	Example: 1617884165196 doStuff malloc 10
+	Format:  time_elapsed function_name event [params]
+	Example: 150 do_stuff RPC_start
+	Example: 152 do_stuff malloc 10
 */
 extern void write_log(std::string msg);
 
@@ -68,12 +73,12 @@ extern void* custom_malloc(std::string func_name, size_t size);
 
 /*
 	A custom free implementation that writes to the log
-	how much memory has been freed.
+	if memory has been freed.
 */
 extern void custom_free(std::string func_name, void* ptr);
 
 /*
-	Strart our custom instrumentation tracker.
+	Starts our custom instrumentation.
 	Side is either "server" or "client".
 */
 extern void start_instrum(std::string func_name, std::string side, 

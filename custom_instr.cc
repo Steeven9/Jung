@@ -59,13 +59,15 @@ void custom_free(string func_name, void* ptr) {
 
 void start_instrum(string func_name, string side,
  const vector<basic_feature*> & feature_list) {
-	ios_base::openmode mode = ofstream::out;
 	if (side == "server") {
 		// append instead of overwrite
-		mode = ofstream::app;
+		log_p.open(SERVER_LOGFILE, ofstream::app);
+	} else if (side == "client") {
+		log_p.open(CLIENT_LOGFILE);
+	} else {
+		cerr << "Error: incorrect parameter " << side << " (start_instrum)" << endl;
+        exit(EXIT_FAILURE);
 	}
-
-	log_p.open(side + "_log.txt", mode);
 
 	if (!log_p.is_open()) {
         cerr << "Error: cannot open " << side << " log" << endl;

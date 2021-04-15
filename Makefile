@@ -21,7 +21,7 @@ GRPC_CFLAGS := $(shell pkg-config --cflags protobuf grpc++)
 
 CXX = g++
 CPPFLAGS += $(GRPC_CFLAGS)
-CXXFLAGS += -std=c++11
+CXXFLAGS += -std=c++17
 LDFLAGS = $(GRPC_LDFLAGS) -lgrpc++_reflection -ldl
 
 PROTOC = protoc

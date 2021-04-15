@@ -33,7 +33,7 @@ long calc_server_time(string RPC_id) {
     ifstream server_log;
     long result = -1;
 
-    server_log.open("server_log.txt");
+    server_log.open(SERVER_LOGFILE);
 
     if (!server_log.is_open()) {
         cerr << "Error: cannot open server log" << endl;
@@ -68,7 +68,7 @@ long calc_server_memory(string RPC_id, bool return_leaks) {
     long mem_usage = -1;
     int mem_leaks = 0;
 
-    server_log.open("server_log.txt");
+    server_log.open(SERVER_LOGFILE);
 
     if (!server_log.is_open()) {
         cerr << "Error: cannot open server log" << endl;
@@ -78,7 +78,6 @@ long calc_server_memory(string RPC_id, bool return_leaks) {
     string line;
     while(getline(server_log, line)) {
         if (line.find(" " + RPC_id + " malloc") != string::npos) {
-            //TODO actually get the correct amount of memory
             mem_usage = stol(line.substr(line.find("malloc ") + 7));
             ++mem_leaks;
         }
@@ -95,8 +94,8 @@ void generate_perf_trace() {
     ifstream client_log;
     ofstream trace_log;
 
-    client_log.open("client_log.txt");
-    trace_log.open("trace_log.txt");
+    client_log.open(CLIENT_LOGFILE);
+    trace_log.open(TRACE_LOGFILE);
 
     if (!client_log.is_open()) {
         cerr << "Error: cannot open client log" << endl;
@@ -125,13 +124,12 @@ void generate_perf_trace() {
     line_vect.push_back(line);
 
     if (line_vect[2] == "FUNC_START") {
-        //TODO correct variable params typing (not int)
         vector<basic_feature*> feature_list;
         string param_name;
-        int param_value;
+        string param_value;
         for (int i = 3; i < line_vect.size(); ++i) {
             param_name = line_vect[i].substr(0, line_vect[i].find("="));
-            param_value = stoi(line_vect[i].substr(line_vect[i].find("=") + 1));
+            param_value = line_vect[i].substr(line_vect[i].find("=") + 1);
             feature_list.push_back(make_feature(param_name, param_value));
         }
         
@@ -206,9 +204,9 @@ void simple_merge() {
     ifstream server_log;
     ofstream merged_log;
 
-    client_log.open("client_log.txt");
-    server_log.open("server_log.txt");
-    merged_log.open("merged_log.txt");
+    client_log.open(CLIENT_LOGFILE);
+    server_log.open(SERVER_LOGFILE);
+    merged_log.open(MERGED_LOGFILE);
 
     if (!client_log.is_open()) {
         cerr << "Error: cannot open client log" << endl;

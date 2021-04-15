@@ -69,13 +69,13 @@ custom_func * make_custom_func(const std::string & n, const std::vector<basic_fe
 }
 
 /* 
-    Produce a unified performance trace with the data
+    Produces a unified performance trace with the data
     from client and server RPC calls.
 */
 extern void generate_perf_trace();
 
 /* 
-    Read a line from the client log, then if there
+    Reads a line from the client log, then if there
     is a RPC request, search the relevant lines in the
     server log and append them.
 */

@@ -101,9 +101,10 @@ class JungClient {
 	The function to be analyzed. Takes an int parameter
 	that should make the complexity scale.
 */
-void doStuff(unsigned int param) {
+void do_stuff(unsigned int param) {
+	string func_name =  __func__;
 	start_instrum(__func__, "client", { make_feature("param", param), 
-										make_feature("useless", 12) });
+										make_feature("useless", 12.2) });
 
 	JungClient jung(grpc::CreateChannel(
 		server_address, grpc::InsecureChannelCredentials()));
@@ -114,27 +115,27 @@ void doStuff(unsigned int param) {
 	// Send the "ciao" messages
 	for (int i = 0; i < param; ++i) {
 		string message("mamma " + to_string(i));
-		write_log("doStuff RPC_start");
+		write_log(func_name + " RPC_start");
 		JungReply reply = jung.Greet(message);
 
 		cout << "Sent: " << message << endl;
 		cout << "Received: " << reply.message() << endl;
 
 		// Save the resulting id from the RPC call
-		write_log("doStuff RPC_end " + to_string(reply.id()));
+		write_log(func_name + " RPC_end " + to_string(reply.id()));
 	}
 
 	// Send the Double messages
 	for (int i = 0; i < param; ++i) {
 		string message(to_string(i));
-		write_log("doStuff RPC_start");
+		write_log(func_name + " RPC_start");
 		JungReply reply = jung.ReturnDouble(message);
 
 		cout << "Sent: " << message << endl;
 		cout << "Received: " << reply.message() << endl;
 
 		// Save the resulting id from the RPC call
-		write_log("doStuff RPC_end " + to_string(reply.id()));
+		write_log(func_name + " RPC_end " + to_string(reply.id()));
 	}
 
 	finish_instrum(__func__);
@@ -175,7 +176,7 @@ int main(int argc, char** argv) {
 	cout << "Connecting to " << server_address << "..." << endl;
 
 	cout << "Starting RPC..." << endl;
-	doStuff(NUM_MSG);
+	do_stuff(NUM_MSG);
 
 	return 0;
 }
