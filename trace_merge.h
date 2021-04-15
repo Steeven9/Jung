@@ -33,15 +33,15 @@ struct custom_func {
     int server_memory = 0;
     int mem_leaks = 0;
     int server_memory_leaks = 0;
-    const std::vector<basic_feature*> & feature_list;
+    const std::vector<basic_feature*> feature_list;
 
     custom_func(const std::string & n, const std::vector<basic_feature*> & f_l)
 	: name(n), feature_list(f_l) {};
 
     virtual std::string print() const {
-        std::string msg = name + " took " + std::to_string(exec_time) + "ms, of which " + 
-            std::to_string(network_time) + "ms in network and " + std::to_string(server_time) + 
-            "ms in server.\nUsed " + std::to_string(memory_usage) + " bytes of memory client-side and " + 
+        std::string msg = name + " took " + std::to_string(exec_time) + " ms, of which approx. " + 
+            std::to_string(network_time) + " ms in network and approx. " + std::to_string(server_time) + 
+            " ms in server.\nUsed " + std::to_string(memory_usage) + " bytes of memory client-side and " + 
             std::to_string(server_memory) + " bytes of memory server-side.";
 
         if (mem_leaks > 0) {
@@ -55,7 +55,7 @@ struct custom_func {
         if (feature_list.size() > 0) {
             msg += "\nFound " + std::to_string(feature_list.size()) + " feature(s): ";
             for (auto f : feature_list) {
-                msg += f->print();
+                msg += f->print() + " ";
             }
         }
 

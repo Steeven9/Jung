@@ -25,25 +25,15 @@
 
 #include "custom_instr.h"
 
-// Uncomment to get a full text timestamp instead of ms
-// WARNING: WILL BREAK THE MERGER, DEBUG ONLY
-//#define HUMAN_READABLE
-
 using namespace std;
 
 ofstream log_p;
-//TODO add precise custom timer (chrono::steady_clock) in ns
+chrono::time_point<chrono::steady_clock> start_time;
 
 void write_log(string msg) {
-	// get current timestamp
-	#ifdef HUMAN_READABLE
-		time_t result = std::time(nullptr);
-		string timestamp = asctime(localtime(&result));
-		timestamp = timestamp.substr(0, timestamp.length() - 1); // get rid of null-terminator
-	#else
-    	int64_t timestamp = chrono::duration_cast<chrono::milliseconds>(
-			chrono::system_clock::now().time_since_epoch()).count();
-	#endif
+	// get current relative timestamp
+	const auto now = chrono::steady_clock::now();
+	size_t timestamp = chrono::duration_cast<chrono::milliseconds>(now - start_time).count();
 
 	log_p << timestamp << " " + msg << endl;
 }
@@ -81,6 +71,8 @@ void start_instrum(string func_name, string side,
         cerr << "Error: cannot open " << side << " log" << endl;
         exit(EXIT_FAILURE);
     }
+
+	start_time = chrono::steady_clock::now();
 
 	string msg = func_name + " FUNC_START";
 	for (auto f : feature_list) {

@@ -42,11 +42,15 @@ long calc_server_time(string RPC_id) {
 
     string line;
     while(getline(server_log, line)) {
-        if (line.find(RPC_id + " FUNC_START") != string::npos) {
-            //TODO skip eventual malloc lines
+        if (line.find(" " + RPC_id + " FUNC_START") != string::npos) {
             //TODO preprocess log file and save indices?
             long start_time = stol(line.substr(0, line.find(" ")));
-            getline(server_log, line);
+
+            //Search for end time skipping eventual malloc lines (or other)
+            while (line.find(" " + RPC_id + " FUNC_END") == string::npos) {
+                getline(server_log, line);
+            }
+            
             result = stol(line.substr(0, line.find(" "))) - start_time;
         }
     }
@@ -56,12 +60,13 @@ long calc_server_time(string RPC_id) {
 }
 
 /* 
-    Helper function to get the memory usage on 
-    server side.
+    Helper function to get the memory usage 
+    or possible memory leaks on server side.
 */
-long calc_server_memory(string RPC_id) {
+long calc_server_memory(string RPC_id, bool return_leaks) {
     ifstream server_log;
-    long result = -1;
+    long mem_usage = -1;
+    int mem_leaks = 0;
 
     server_log.open("server_log.txt");
 
@@ -72,14 +77,18 @@ long calc_server_memory(string RPC_id) {
 
     string line;
     while(getline(server_log, line)) {
-        if (line.find(RPC_id + " malloc") != string::npos) {
+        if (line.find(" " + RPC_id + " malloc") != string::npos) {
             //TODO actually get the correct amount of memory
-            result = stol(line.substr(line.find("malloc ") + 7));
+            mem_usage = stol(line.substr(line.find("malloc ") + 7));
+            ++mem_leaks;
+        }
+        if (line.find(" " + RPC_id + " free") != string::npos) {
+            --mem_leaks;
         }
     }
 
     server_log.close();
-    return result;
+    return return_leaks ? mem_leaks : mem_usage;
 }
 
 void generate_perf_trace() {
@@ -116,12 +125,17 @@ void generate_perf_trace() {
     line_vect.push_back(line);
 
     if (line_vect[2] == "FUNC_START") {
-        //TODO variable number of params
         //TODO correct variable params typing (not int)
-        //TODO correctly pass feature object?
-        string param_name = line_vect[3].substr(0, line_vect[3].find("="));
-        int param_value = stoi(line_vect[3].substr(line_vect[3].find("=") + 1));
-        func = make_custom_func(line_vect[1], { make_feature(param_name, param_value) });
+        vector<basic_feature*> feature_list;
+        string param_name;
+        int param_value;
+        for (int i = 3; i < line_vect.size(); ++i) {
+            param_name = line_vect[i].substr(0, line_vect[i].find("="));
+            param_value = stoi(line_vect[i].substr(line_vect[i].find("=") + 1));
+            feature_list.push_back(make_feature(param_name, param_value));
+        }
+        
+        func = make_custom_func(line_vect[1], feature_list);
         start_time = stol(line_vect[0]);
     } else {
         cerr << "Error: incorrect logfile format (no start)" << endl;
@@ -152,20 +166,17 @@ void generate_perf_trace() {
 
         //RPC start
         if (line_vect[2] == "RPC_start") {
-            //TODO network time, server time, server memory usage, server mem leaks
-
             RPC_start_time = stol(line_vect[0]);
         }
 
         //RPC end
         if (line_vect[2] == "RPC_end") {
-            //TODO same as above
-
             long server_time = calc_server_time(line_vect[3]);
 
             func->server_time += server_time;
             func->network_time += stol(line_vect[0]) - RPC_start_time - server_time;
-            func->server_memory += calc_server_memory(line_vect[3]);
+            func->server_memory += calc_server_memory(line_vect[3], false);
+            func->server_memory_leaks += calc_server_memory(line_vect[3], true);
         }
 
         //Function end - done
@@ -215,15 +226,20 @@ void simple_merge() {
     }
 
     string line;
+    string tmp_line;
     while(getline(client_log, line)) {
-        merged_log << line << endl;
+        tmp_line = line;
         // If RPC request, add server data
-        if (line.find("RPC_start") != string::npos) {
+        if (line.find("RPC_end") != string::npos) {
+            string RPC_id = line.substr(line.find("RPC_end ") + 8);
             getline(server_log, line);
-            merged_log << line + " [server]" << endl;
-            getline(server_log, line);
+            while (line.find(" " + RPC_id + " FUNC_END") == string::npos) {
+                merged_log << line + " [server]" << endl;
+                getline(server_log, line);
+            }
             merged_log << line + " [server]" << endl;
         }
+        merged_log << tmp_line << endl;
     }
 
     cout << "Simple merge completed successfully" << endl;
@@ -235,7 +251,6 @@ void simple_merge() {
 
 int main(int argc, char** argv) {    
     if (argc > 1 && strcmp(argv[1], "--simple") == 0) {
-        //TODO fix the id lookup if server log is already started
         simple_merge();
     } else {
         generate_perf_trace();

@@ -102,7 +102,8 @@ class JungClient {
 	that should make the complexity scale.
 */
 void doStuff(unsigned int param) {
-	start_instrum(__func__, "client", { make_feature("param", param) });
+	start_instrum(__func__, "client", { make_feature("param", param), 
+										make_feature("useless", 12) });
 
 	JungClient jung(grpc::CreateChannel(
 		server_address, grpc::InsecureChannelCredentials()));
