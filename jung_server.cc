@@ -55,8 +55,13 @@ class JungServiceImpl final : public Jung::Service {
 		func_name += " " + to_string(++reply_id);
 		start_instrum(func_name, "server", { make_feature("msg_len", request->message().length()) });
 
+		//Allocate a byte of memory but free it immediately
+		void* mem_p = custom_malloc(func_name, 1);
+
 		reply->set_message("Ciao " + request->message());
 		reply->set_id(reply_id);
+
+		custom_free(func_name, mem_p);
 
 		if (VERBOSE) {
 			cout << "Received " << func_name << ": " << request->message() << endl;
@@ -74,6 +79,7 @@ class JungServiceImpl final : public Jung::Service {
 		reply->set_message(to_string(stoi(request->message()) * 2));
 		reply->set_id(reply_id);
 
+		// allocate some memory without freeing it. Should warn
 		custom_malloc(func_name, stoi(request->message()));
 
 		if (VERBOSE) {

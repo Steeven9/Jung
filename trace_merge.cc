@@ -20,18 +20,22 @@
 #include <iostream>
 #include <vector>
 #include <string.h>
+#include <tuple>
 
 #include "trace_merge.h"
 
 using namespace std;
 
+vector<tuple<int, int>> server_log_indices;
+vector<string> server_log_lines;
+
 /* 
-    Helper function to get the execution time on 
-    server side.
+    Helper function to parse the server logfile
+    and store indices of lines to simplify
+    and speed up further access.
 */
-long calc_server_time(string RPC_id) {
+void preprocess_server_log() {
     ifstream server_log;
-    long result = -1;
 
     server_log.open(SERVER_LOGFILE);
 
@@ -41,22 +45,58 @@ long calc_server_time(string RPC_id) {
     }
 
     string line;
+    int line_num = 0;
     while(getline(server_log, line)) {
-        if (line.find(" " + RPC_id + " FUNC_START") != string::npos) {
-            //TODO use the preprocessed log file
-            long start_time = stol(line.substr(0, line.find(" ")));
+        server_log_lines.push_back(line);
 
-            //Search for end time skipping eventual other lines
-            while (line.find(" " + RPC_id + " FUNC_END") == string::npos) {
-                getline(server_log, line);
+        if (line.find(" FUNC_START") != string::npos) {
+            size_t pos;
+            vector<string> line_vect;
+            while ((pos = line.find(" ")) != string::npos) {
+                line_vect.push_back(line.substr(0, pos));
+                line.erase(0, pos + 1);
             }
-            
-            result = stol(line.substr(0, line.find(" "))) - start_time;
+            int index = stoi(line_vect[2]);
+            server_log_indices.push_back(make_tuple(index, line_num));
         }
+
+        ++line_num;
     }
 
     server_log.close();
-    return result;
+}
+
+/*
+    Helper function to get the line number of 
+    the start of a given RPC server execution.
+*/
+int get_line_num(int RPC_id) {
+    int line_num;
+    for (auto t : server_log_indices) {
+        if (get<0>(t) == RPC_id) {
+            line_num = get<1>(t);
+            break;
+        }
+    }
+    return line_num;
+}
+
+/* 
+    Helper function to get the execution time on 
+    server side.
+*/
+long calc_server_time(string RPC_id) {
+    int line_num = get_line_num(stoi(RPC_id));
+
+    string line = server_log_lines[line_num];
+    long start_time = stol(line.substr(0, line.find(" ")));
+    
+    //Search for end time skipping eventual other lines
+    while (line.find(" " + RPC_id + " FUNC_END") == string::npos) {
+        line = server_log_lines[++line_num];
+    }
+    
+    return stol(line.substr(0, line.find(" "))) - start_time;
 }
 
 /* 
@@ -64,29 +104,26 @@ long calc_server_time(string RPC_id) {
     or possible memory leaks on server side.
 */
 long calc_server_memory(string RPC_id, bool return_leaks) {
-    ifstream server_log;
-    long mem_usage = -1;
+    long mem_usage = 0;
     int mem_leaks = 0;
 
-    server_log.open(SERVER_LOGFILE);
+    int line_num = get_line_num(stoi(RPC_id));
 
-    if (!server_log.is_open()) {
-        cerr << "Error: cannot open server log" << endl;
-        exit(EXIT_FAILURE);
-    }
-
-    string line;
-    while(getline(server_log, line)) {
+    string line = server_log_lines[line_num];
+    while (line.find(" " + RPC_id + " FUNC_END") == string::npos) {
         if (line.find(" " + RPC_id + " malloc") != string::npos) {
             mem_usage = stol(line.substr(line.find("malloc ") + 7));
             ++mem_leaks;
         }
+        if (line.find(" " + RPC_id + " realloc") != string::npos) {
+            cout << "Found realloc call (RPC #" << RPC_id << "). Memory stats might be inaccurate" << endl;
+        }
         if (line.find(" " + RPC_id + " free") != string::npos) {
             --mem_leaks;
         }
+        line = server_log_lines[++line_num];
     }
 
-    server_log.close();
     return return_leaks ? mem_leaks : mem_usage;
 }
 
@@ -106,6 +143,8 @@ void generate_perf_trace() {
         cerr << "Error: cannot write trace log" << endl;
         exit(EXIT_FAILURE);
     }
+
+    preprocess_server_log();
 
     string line;
     vector<string> line_vect;
