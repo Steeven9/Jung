@@ -33,7 +33,7 @@ chrono::time_point<chrono::steady_clock> start_time;
 void write_log(string msg) {
 	// get current relative timestamp
 	const auto now = chrono::steady_clock::now();
-	size_t timestamp = chrono::duration_cast<chrono::milliseconds>(now - start_time).count();
+	size_t timestamp = chrono::duration_cast<chrono::TIMER_PRECISION>(now - start_time).count();
 
 	log_p << timestamp << " " + msg << endl;
 }
@@ -46,6 +46,24 @@ void* custom_malloc(string func_name, size_t size) {
 	}
 	write_log(func_name + " malloc " + to_string(size));
 	return ptr;
+}
+
+void* custom_realloc(string func_name, void * ptr, size_t size) {
+	void* new_ptr;
+	//If ptr is a null pointer, the realloc function behaves 
+	//like the malloc function for the specified size
+	if (!ptr) {
+		new_ptr = custom_malloc(func_name, size);
+	} else {
+		new_ptr = realloc(ptr, size);
+		write_log(func_name + " realloc " + to_string(size));
+	}
+	
+	if (!new_ptr) {
+		cerr << "Error: cannot reallocate memory" << endl;
+		exit(EXIT_FAILURE);
+	}	
+	return new_ptr;
 }
 
 void custom_free(string func_name, void* ptr) {

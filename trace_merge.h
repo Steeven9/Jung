@@ -39,9 +39,9 @@ struct custom_func {
 	: name(n), feature_list(f_l) {};
 
     virtual std::string print() const {
-        std::string msg = name + " took " + std::to_string(exec_time) + " ms, of which approx. " + 
-            std::to_string(network_time) + " ms in network and approx. " + std::to_string(server_time) + 
-            " ms in server.\nUsed " + std::to_string(memory_usage) + " bytes of memory client-side and " + 
+        std::string msg = name + " took " + std::to_string(exec_time) + " " + TIMER_UNIT + ", of which approx. " + 
+            std::to_string(network_time) + " " + TIMER_UNIT + " in network and approx. " + std::to_string(server_time) + 
+            " " + TIMER_UNIT + " in server.\nUsed " + std::to_string(memory_usage) + " bytes of memory client-side and " + 
             std::to_string(server_memory) + " bytes of memory server-side.";
 
         if (mem_leaks > 0) {

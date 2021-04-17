@@ -30,6 +30,9 @@
 #define TRACE_LOGFILE  "trace_log.txt"
 #define MERGED_LOGFILE "merged_log.txt"
 
+#define TIMER_PRECISION milliseconds
+#define TIMER_UNIT "ms"
+
 class basic_feature {
 public:
     virtual std::string print() const = 0;
@@ -70,6 +73,12 @@ extern void write_log(std::string msg);
 	how much memory has been allocated.
 */
 extern void* custom_malloc(std::string func_name, size_t size);
+
+/*
+	A custom realloc implementation that writes to the log
+	how much memory has been reallocated (if any).
+*/
+extern void* custom_realloc(std::string func_name, void * ptr, size_t size);
 
 /*
 	A custom free implementation that writes to the log

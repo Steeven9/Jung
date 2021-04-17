@@ -43,10 +43,10 @@ long calc_server_time(string RPC_id) {
     string line;
     while(getline(server_log, line)) {
         if (line.find(" " + RPC_id + " FUNC_START") != string::npos) {
-            //TODO preprocess log file and save indices?
+            //TODO use the preprocessed log file
             long start_time = stol(line.substr(0, line.find(" ")));
 
-            //Search for end time skipping eventual malloc lines (or other)
+            //Search for end time skipping eventual other lines
             while (line.find(" " + RPC_id + " FUNC_END") == string::npos) {
                 getline(server_log, line);
             }
