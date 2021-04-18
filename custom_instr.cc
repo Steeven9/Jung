@@ -31,7 +31,7 @@ ofstream log_p;
 chrono::time_point<chrono::steady_clock> start_time;
 
 void write_log(string msg) {
-	// get current relative timestamp
+	// Get current relative timestamp
 	const auto now = chrono::steady_clock::now();
 	size_t timestamp = chrono::duration_cast<chrono::TIMER_PRECISION>(now - start_time).count();
 
@@ -50,8 +50,8 @@ void* custom_malloc(string func_name, size_t size) {
 
 void* custom_realloc(string func_name, void * ptr, size_t size) {
 	void* new_ptr;
-	//If ptr is a null pointer, the realloc function behaves 
-	//like the malloc function for the specified size
+	// If ptr is a null pointer, the realloc function behaves 
+	// like the malloc function for the specified size
 	if (!ptr) {
 		new_ptr = custom_malloc(func_name, size);
 	} else {
@@ -78,7 +78,7 @@ void custom_free(string func_name, void* ptr) {
 void start_instrum(string func_name, string side,
  const vector<basic_feature*> & feature_list) {
 	if (side == "server") {
-		// append instead of overwrite
+		// Append instead of overwrite
 		log_p.open(SERVER_LOGFILE, ofstream::app);
 	} else if (side == "client") {
 		log_p.open(CLIENT_LOGFILE);

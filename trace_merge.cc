@@ -91,7 +91,7 @@ long calc_server_time(string RPC_id) {
     string line = server_log_lines[line_num];
     long start_time = stol(line.substr(0, line.find(" ")));
     
-    //Search for end time skipping eventual other lines
+    // Search for end time skipping eventual other lines
     while (line.find(" " + RPC_id + " FUNC_END") == string::npos) {
         line = server_log_lines[++line_num];
     }
@@ -153,9 +153,9 @@ void generate_perf_trace() {
     long start_time;
     long RPC_start_time;
 
-    //First line - initialize struct
+    // First line - initialize struct
     getline(client_log, line);
-    //Separate the line on spaces and put the tokens in vector
+    // Separate the line on spaces and put the tokens in vector
     while ((pos = line.find(" ")) != string::npos) {
         line_vect.push_back(line.substr(0, pos));
         line.erase(0, pos + 1);
@@ -179,18 +179,18 @@ void generate_perf_trace() {
         exit(EXIT_FAILURE);
     }
 
-    //Get the client logfile line by line
+    // Get the client logfile line by line
     while(getline(client_log, line)) {
         line_vect.clear();
 
-        //Separate the line on spaces and put the tokens in vector
+        // Separate the line on spaces and put the tokens in vector
         while ((pos = line.find(" ")) != string::npos) {
             line_vect.push_back(line.substr(0, pos));
             line.erase(0, pos + 1);
         }
         line_vect.push_back(line);
 
-        //Memory allocation
+        // Memory allocation
         if (line_vect[2] == "malloc") {
             func->memory_usage += stoi(line_vect[3]);
             ++func->mem_leaks;
@@ -201,12 +201,12 @@ void generate_perf_trace() {
             --func->mem_leaks;
         }
 
-        //RPC start
+        // RPC start
         if (line_vect[2] == "RPC_start") {
             RPC_start_time = stol(line_vect[0]);
         }
 
-        //RPC end
+        // RPC end
         if (line_vect[2] == "RPC_end") {
             long server_time = calc_server_time(line_vect[3]);
 
@@ -216,7 +216,7 @@ void generate_perf_trace() {
             func->server_memory_leaks += calc_server_memory(line_vect[3], true);
         }
 
-        //Function end - done
+        // Function end - done
         if (line_vect[2] == "FUNC_END") {
             func->exec_time = stol(line_vect[0]) - start_time;
         }
@@ -231,7 +231,7 @@ void generate_perf_trace() {
 
     cout << func->print() << endl;
 
-    //TODO figure out the proper format to encode it in
+    // TODO figure out the proper format to encode it in
     trace_log << func->print() << endl;
 
     client_log.close();

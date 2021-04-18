@@ -30,3 +30,5 @@ TODO for long-term
 TODO in the next meeting
 
 - check on improved merge tool
+- look into formatting the output for freud
+- demo
