@@ -41,16 +41,27 @@ Note: all the file names are customizable in `custom_instr.h`.
 
 Disclaimer: the memory usage counter is not keeping track of the variations due to `realloc` calls. 
 While the library provides a warning for potential memory leaks, this might be inaccurate due to the complexity of memory managment in C.
-Consider running you application through a dedicated tool like [Valgrind](https://valgrind.org/).
+Consider running your application through a dedicated tool like [Valgrind](https://valgrind.org/).
 
 
 ## Docker
 
-A server Docker image is available. You can build it with `docker build -t jung .` and then run it e.g. with `docker run -d -p 50051:50051 -v ~/Jung:/usr/Jung --name jung jung` or simply get it from [Docker Hub](https://hub.docker.com/repository/docker/steeven9/jung) as `steeven9/jung` and run it in the same way.
+A server Docker image of the example is available. You can build it with `docker build -t jung .` and then run it 
+e.g. with `docker run -d -p 50051:50051 -v ~/Jung:/usr/Jung --name jung jung` or simply get it from 
+[Docker Hub](https://hub.docker.com/repository/docker/steeven9/jung) as `steeven9/jung` and run it in the same way.
 
 
 ## Running on another machine
 
-If your server is running on another machine (which is probably the case), simply pass its address/hostname to the client as parameter (port is `50051` by default, editable in `jung_server.cc`):
+If your server is running on another machine (which is probably the case), simply pass its address/hostname 
+to the client as parameter (port is `50051` by default, editable in `jung_server.cc`):
 
 `./jung_client --target=HOSTNAME[:PORT]`
+
+
+## Using the library
+
+If you want to measure your own application, simply include `custom_instr.h`, which provides all the necessary
+functions to manage the instrumentation. Make sure to also include the corresponding `.cc` file in your compilation unit.
+
+To merge the obtained traces, compile and run `trace_merge.cc` (which requires `custom_instr.h` as well).

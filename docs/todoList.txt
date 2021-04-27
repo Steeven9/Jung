@@ -10,25 +10,25 @@ Done so far
 - optimize compilation and installation, add cross-platform instructions
 - dockerize the server to easily have it running permanently [non-essential]
 - improve instrumentation functions to pass feature object (key/value)
+- develop a tool to merge the performance logs from client and server
 
 ---------------------
 TODO for next step
 
 - improve performace traces format to make it compatible with freud-statistics
 - develop a reader tool to "decrypt" the traces (with flag for human-readable stamps) [non-essential]
-- develop a tool to merge the performance logs from client and server
 - start on the report template
 
 ---------------------
 TODO for long-term
 
 - identify some third-party non-trivial distributed applications and analyze them
-- write the report, prepare the poster and presentation 
+- write the report
 - have a pizza
 
 ---------------------
 TODO in the next meeting
 
-- check on improved merge tool
-- look into formatting the output for freud
+- check on improved merge tool and next steps
+- look into formatting the output for freud (if possible?)
 - demo
