@@ -86,6 +86,9 @@ extern void* custom_realloc(std::string func_name, void * ptr, size_t size);
 */
 extern void custom_free(std::string func_name, void* ptr);
 
+//TODO add custom_pthread_mutex_lock, custom_pthread_mutex_trylock, 
+//custom_pthread_mutex_unlock, custom_pthread_cond_wait, custom_pthread_cond_timedwait
+
 /*
 	Starts our custom instrumentation.
 	Side is either "server" or "client".

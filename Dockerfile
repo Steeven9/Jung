@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:latest
 
 ENV TZ=Europe/Zurich
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone

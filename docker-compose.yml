@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  jung:
+    container_name: jung
+    image: steeven9/jung
+    ports:
+      - "50051:50051"
+    volumes:
+      - ./:/usr/Jung
+networks:
+  default:
+    name: jung

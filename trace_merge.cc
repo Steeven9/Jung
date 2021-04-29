@@ -101,9 +101,9 @@ long calc_server_time(string RPC_id) {
 
 /* 
     Helper function to get the memory usage 
-    or possible memory leaks on server side.
+    and possible memory leaks on server side.
 */
-long calc_server_memory(string RPC_id, bool return_leaks) {
+tuple<long, int> calc_server_memory(string RPC_id) {
     long mem_usage = 0;
     int mem_leaks = 0;
 
@@ -124,7 +124,33 @@ long calc_server_memory(string RPC_id, bool return_leaks) {
         line = server_log_lines[++line_num];
     }
 
-    return return_leaks ? mem_leaks : mem_usage;
+    return {mem_usage, mem_leaks};
+}
+
+/* 
+    Helper function to get the pagefaults 
+    on server side.
+*/
+tuple<int, int> calc_server_pagefaults(string RPC_id) {
+    tuple<int, int> result;
+    int line_num = get_line_num(stoi(RPC_id));
+
+    string line = server_log_lines[line_num];
+    while (line.find(" " + RPC_id + " FUNC_END") == string::npos) {
+        if (line.find(" " + RPC_id + " pagefault") != string::npos) {
+            size_t pos;
+            vector<string> line_vect;
+            while ((pos = line.find(" ")) != string::npos) {
+                line_vect.push_back(line.substr(0, pos));
+                line.erase(0, pos + 1);
+            }
+            line_vect.push_back(line);
+            result = {stol(line_vect[4]), stol(line_vect[5])};
+        }
+        line = server_log_lines[++line_num];
+    }
+
+    return result;
 }
 
 void generate_perf_trace() {
@@ -206,14 +232,28 @@ void generate_perf_trace() {
             RPC_start_time = stol(line_vect[0]);
         }
 
+        //TODO add support for custom_pthread_mutex_lock, custom_pthread_mutex_trylock, 
+        //custom_pthread_mutex_unlock, custom_pthread_cond_wait, custom_pthread_cond_timedwait
+
         // RPC end
         if (line_vect[2] == "RPC_end") {
             long server_time = calc_server_time(line_vect[3]);
-
             func->server_time += server_time;
             func->network_time += stol(line_vect[0]) - RPC_start_time - server_time;
-            func->server_memory += calc_server_memory(line_vect[3], false);
-            func->server_memory_leaks += calc_server_memory(line_vect[3], true);
+
+            tuple<long, int> server_mem = calc_server_memory(line_vect[3]);
+            func->server_memory += get<0>(server_mem);
+            func->server_memory_leaks += get<1>(server_mem);
+
+            tuple<int, int> server_faults = calc_server_pagefaults(line_vect[3]);
+            func->min_pagefault += get<0>(server_faults);
+            func->maj_pagefault += get<1>(server_faults);
+        }
+
+        // Pagefault (minor and major)
+        if (line_vect[2] == "pagefault") {
+            func->min_pagefault += stoi(line_vect[3]);
+            func->maj_pagefault += stoi(line_vect[4]);
         }
 
         // Function end - done
@@ -231,11 +271,15 @@ void generate_perf_trace() {
 
     cout << func->print() << endl;
 
-    // TODO figure out the proper format to encode it in
-    trace_log << func->print() << endl;
+    encode_perf_trace(trace_log, func);
 
     client_log.close();
     trace_log.close();
+}
+
+void encode_perf_trace(ofstream & output, custom_func * f) {
+    //TODO encode output in binary
+    output << f->print() << endl;
 }
 
 void simple_merge() {
@@ -286,9 +330,13 @@ void simple_merge() {
     merged_log.close();
 }
 
-int main(int argc, char** argv) {    
-    if (argc > 1 && strcmp(argv[1], "--simple") == 0) {
-        simple_merge();
+int main(int argc, char** argv) { 
+    if (argc > 1) {
+        if (strcmp(argv[1], "--simple") == 0) {
+            simple_merge();
+        } else {
+            cerr << "Usage: " << argv[0] << " [--simple]" << endl;
+        }
     } else {
         generate_perf_trace();
     }    

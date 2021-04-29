@@ -98,7 +98,7 @@ class JungClient {
 };
 
 /*
-	The function to be analyzed. Takes an int parameter
+	A function to be analyzed. Takes an int parameter
 	that should make the complexity scale.
 */
 void do_stuff(unsigned int param) {
@@ -141,6 +141,14 @@ void do_stuff(unsigned int param) {
 	finish_instrum(__func__);
 }
 
+/*
+	A multithreaded function to be analyzed. Takes an 
+	int parameter that should make the complexity scale.
+*/
+void do_multi_stuff(unsigned int param) {
+	//TODO
+}
+
 int main(int argc, char** argv) {
 	// Instantiate the client. It requires a channel, out of which the actual RPCs
 	// are created. This channel models a connection to an endpoint specified by
@@ -175,8 +183,11 @@ int main(int argc, char** argv) {
 
 	cout << "Connecting to " << server_address << "..." << endl;
 
-	cout << "Starting RPC..." << endl;
+	cout << "Starting RPC test..." << endl;
 	do_stuff(NUM_MSG);
+
+	cout << "Starting multithreaded test..." << endl;
+	do_multi_stuff(NUM_MSG);
 
 	return 0;
 }

@@ -22,6 +22,8 @@
 #include <chrono>
 #include <fstream>
 #include <vector>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #include "custom_instr.h"
 
@@ -103,7 +105,10 @@ void start_instrum(string func_name, string side,
 	write_log(msg);
 }
 
-void finish_instrum(string func_name) {
+void finish_instrum(string func_name) {	
+	struct rusage data;
+	getrusage(RUSAGE_SELF, &data);
+	write_log(func_name + " pagefault " + to_string(data.ru_minflt) + " " + to_string(data.ru_majflt));
 	write_log(func_name + " FUNC_END");
 	log_p.close();
 }

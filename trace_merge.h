@@ -33,6 +33,8 @@ struct custom_func {
     int server_memory = 0;
     int mem_leaks = 0;
     int server_memory_leaks = 0;
+    int min_pagefault = 0;
+    int maj_pagefault = 0;
     const std::vector<basic_feature*> feature_list;
 
     custom_func(const std::string & n, const std::vector<basic_feature*> & f_l)
@@ -42,7 +44,8 @@ struct custom_func {
         std::string msg = name + " took " + std::to_string(exec_time) + " " + TIMER_UNIT + ", of which approx. " + 
             std::to_string(network_time) + " " + TIMER_UNIT + " in network and approx. " + std::to_string(server_time) + 
             " " + TIMER_UNIT + " in server.\nUsed " + std::to_string(memory_usage) + " bytes of memory client-side and " + 
-            std::to_string(server_memory) + " bytes of memory server-side.";
+            std::to_string(server_memory) + " bytes of memory server-side.\nThere were " + std::to_string(min_pagefault) + 
+            " minor pagefaults and " + std::to_string(maj_pagefault) + " major ones.";
 
         if (mem_leaks > 0) {
             msg += "\nPossible client memory leak detected! " + std::to_string(mem_leaks) + " malloc call(s) not freed.";
@@ -73,6 +76,12 @@ custom_func * make_custom_func(const std::string & n, const std::vector<basic_fe
     from client and server RPC calls.
 */
 extern void generate_perf_trace();
+
+/*
+    Econdes the performance stats in Freud's binary format
+    so that it can be read by freud-statistics.
+*/
+extern void encode_perf_trace(std::ofstream & output, custom_func * f);
 
 /* 
     Reads a line from the client log, then if there

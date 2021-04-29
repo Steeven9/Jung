@@ -12,23 +12,30 @@ Done so far
 - improve instrumentation functions to pass feature object (key/value)
 - develop a tool to merge the performance logs from client and server
 
----------------------
+
 TODO for next step
-
-- improve performace traces format to make it compatible with freud-statistics
-- develop a reader tool to "decrypt" the traces (with flag for human-readable stamps) [non-essential]
-- start on the report template
-
 ---------------------
-TODO for long-term
+- improve performace traces format to make it compatible with freud-statistics
+- add custom_lock/unlock and custom_wait (->freud-pin.cpp:611)
+- add pagefaults stat with getrusage(RUSAGE_THREAD, struct rusage *usage)
+- look into condition variables locking
+- add demo with multithreading to test locks stats
+- change ints to unints_32 or 64 (based on freud)
 
+
+TODO for long-term
+---------------------
 - identify some third-party non-trivial distributed applications and analyze them
 - write the report
 - have a pizza
 
----------------------
-TODO in the next meeting
 
-- check on improved merge tool and next steps
-- look into formatting the output for freud (if possible?)
-- demo
+On hold
+---------------------
+- develop a reader tool to "decrypt" the traces (with flag for human-readable stamps) [non-essential]
+
+
+TODO in the next meeting
+---------------------
+- check on new features
+- Freud demo?
