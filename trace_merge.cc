@@ -85,11 +85,11 @@ int get_line_num(int RPC_id) {
     Helper function to get the execution time on 
     server side.
 */
-long calc_server_time(string RPC_id) {
+uint64_t calc_server_time(string RPC_id) {
     int line_num = get_line_num(stoi(RPC_id));
 
     string line = server_log_lines[line_num];
-    long start_time = stol(line.substr(0, line.find(" ")));
+    uint64_t start_time = stol(line.substr(0, line.find(" ")));
     
     // Search for end time skipping eventual other lines
     while (line.find(" " + RPC_id + " FUNC_END") == string::npos) {
@@ -103,9 +103,9 @@ long calc_server_time(string RPC_id) {
     Helper function to get the memory usage 
     and possible memory leaks on server side.
 */
-tuple<long, int> calc_server_memory(string RPC_id) {
-    long mem_usage = 0;
-    int mem_leaks = 0;
+tuple<uint64_t, uint64_t> calc_server_memory(string RPC_id) {
+    uint64_t mem_usage = 0;
+    uint64_t mem_leaks = 0;
 
     int line_num = get_line_num(stoi(RPC_id));
 
@@ -131,8 +131,8 @@ tuple<long, int> calc_server_memory(string RPC_id) {
     Helper function to get the pagefaults 
     on server side.
 */
-tuple<int, int> calc_server_pagefaults(string RPC_id) {
-    tuple<int, int> result;
+tuple<uint64_t, uint64_t> calc_server_pagefaults(string RPC_id) {
+    tuple<uint64_t, uint64_t> result;
     int line_num = get_line_num(stoi(RPC_id));
 
     string line = server_log_lines[line_num];
@@ -176,8 +176,8 @@ void generate_perf_trace() {
     vector<string> line_vect;
     size_t pos;
     custom_func * func;
-    long start_time;
-    long RPC_start_time;
+    uint64_t start_time;
+    uint64_t RPC_start_time;
 
     // First line - initialize struct
     getline(client_log, line);
@@ -237,15 +237,15 @@ void generate_perf_trace() {
 
         // RPC end
         if (line_vect[2] == "RPC_end") {
-            long server_time = calc_server_time(line_vect[3]);
+            uint64_t server_time = calc_server_time(line_vect[3]);
             func->server_time += server_time;
             func->network_time += stol(line_vect[0]) - RPC_start_time - server_time;
 
-            tuple<long, int> server_mem = calc_server_memory(line_vect[3]);
+            tuple<uint64_t, uint64_t> server_mem = calc_server_memory(line_vect[3]);
             func->server_memory += get<0>(server_mem);
             func->server_memory_leaks += get<1>(server_mem);
 
-            tuple<int, int> server_faults = calc_server_pagefaults(line_vect[3]);
+            tuple<uint64_t, uint64_t> server_faults = calc_server_pagefaults(line_vect[3]);
             func->min_pagefault += get<0>(server_faults);
             func->maj_pagefault += get<1>(server_faults);
         }

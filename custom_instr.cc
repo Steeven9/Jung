@@ -32,12 +32,12 @@ using namespace std;
 ofstream log_p;
 chrono::time_point<chrono::steady_clock> start_time;
 
-void write_log(string msg) {
+void write_log(string func_name, string msg) {
 	// Get current relative timestamp
 	const auto now = chrono::steady_clock::now();
 	size_t timestamp = chrono::duration_cast<chrono::TIMER_PRECISION>(now - start_time).count();
 
-	log_p << timestamp << " " + msg << endl;
+	log_p << timestamp << " " + func_name << " " + msg << endl;
 }
 
 void* custom_malloc(string func_name, size_t size) {
@@ -46,7 +46,7 @@ void* custom_malloc(string func_name, size_t size) {
 		cerr << "Error: cannot allocate memory" << endl;
 		exit(EXIT_FAILURE);
 	}
-	write_log(func_name + " malloc " + to_string(size));
+	write_log(func_name, " malloc " + to_string(size));
 	return ptr;
 }
 
@@ -58,7 +58,7 @@ void* custom_realloc(string func_name, void * ptr, size_t size) {
 		new_ptr = custom_malloc(func_name, size);
 	} else {
 		new_ptr = realloc(ptr, size);
-		write_log(func_name + " realloc " + to_string(size));
+		write_log(func_name, " realloc " + to_string(size));
 	}
 	
 	if (!new_ptr) {
@@ -73,7 +73,7 @@ void custom_free(string func_name, void* ptr) {
 		cerr << "Error: cannot free memory" << endl;
 		exit(EXIT_FAILURE);
 	}
-	write_log(func_name + " free");
+	write_log(func_name, " free");
 	free(ptr);
 }
 
@@ -96,19 +96,20 @@ void start_instrum(string func_name, string side,
 
 	start_time = chrono::steady_clock::now();
 
-	string msg = func_name + " FUNC_START";
+	string msg = " FUNC_START";
 	for (auto f : feature_list) {
 		msg += " ";
 		msg += f->print();
 	}
 
-	write_log(msg);
+	write_log(func_name, msg);
 }
 
 void finish_instrum(string func_name) {	
 	struct rusage data;
+	//RUSAGE_THREAD is not defined on darwin so we use SELF for portability
 	getrusage(RUSAGE_SELF, &data);
-	write_log(func_name + " pagefault " + to_string(data.ru_minflt) + " " + to_string(data.ru_majflt));
-	write_log(func_name + " FUNC_END");
+	write_log(func_name, " pagefault " + to_string(data.ru_minflt) + " " + to_string(data.ru_majflt));
+	write_log(func_name, " FUNC_END");
 	log_p.close();
 }

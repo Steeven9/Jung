@@ -117,6 +117,7 @@ void run_server() {
 
 int main(int argc, char** argv) {
 	if (filesystem::exists(SERVER_LOGFILE) && CLEAR_LOG) {
+		cout << "Removing previous logs..." << endl;
 		remove(SERVER_LOGFILE);
 	}
 

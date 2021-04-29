@@ -115,27 +115,27 @@ void do_stuff(unsigned int param) {
 	// Send the "ciao" messages
 	for (int i = 0; i < param; ++i) {
 		string message("mamma " + to_string(i));
-		write_log(func_name + " RPC_start");
+		write_log(func_name, " RPC_start");
 		JungReply reply = jung.Greet(message);
 
 		cout << "Sent: " << message << endl;
 		cout << "Received: " << reply.message() << endl;
 
 		// Save the resulting id from the RPC call
-		write_log(func_name + " RPC_end " + to_string(reply.id()));
+		write_log(func_name, " RPC_end " + to_string(reply.id()));
 	}
 
 	// Send the Double messages
 	for (int i = 0; i < param; ++i) {
 		string message(to_string(i));
-		write_log(func_name + " RPC_start");
+		write_log(func_name, " RPC_start");
 		JungReply reply = jung.ReturnDouble(message);
 
 		cout << "Sent: " << message << endl;
 		cout << "Received: " << reply.message() << endl;
 
 		// Save the resulting id from the RPC call
-		write_log(func_name + " RPC_end " + to_string(reply.id()));
+		write_log(func_name, " RPC_end " + to_string(reply.id()));
 	}
 
 	finish_instrum(__func__);

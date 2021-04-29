@@ -12,7 +12,7 @@ A tool for Instrumentation and Performance Analysis of Distributed Systems based
 ## Install gRPC and protobuf
 
 ### Linux
-`apt install protobuf-compiler-grpc libgrpc-dev libgrpc++-dev`
+`apt install build-essential pkg-config protobuf-compiler-grpc libgrpc-dev libgrpc++-dev`
 
 ### macOS
 `brew install grpc`

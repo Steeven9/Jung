@@ -26,15 +26,15 @@
 
 struct custom_func {
     std::string name;
-    long exec_time = 0;
-    long network_time = 0;
-    long server_time = 0;
-    int memory_usage = 0;
-    int server_memory = 0;
-    int mem_leaks = 0;
-    int server_memory_leaks = 0;
-    int min_pagefault = 0;
-    int maj_pagefault = 0;
+    uint64_t exec_time = 0;
+    uint64_t network_time = 0;
+    uint64_t server_time = 0;
+    uint64_t memory_usage = 0;
+    uint64_t server_memory = 0;
+    uint64_t mem_leaks = 0;
+    uint64_t server_memory_leaks = 0;
+    uint64_t min_pagefault = 0;
+    uint64_t maj_pagefault = 0;
     const std::vector<basic_feature*> feature_list;
 
     custom_func(const std::string & n, const std::vector<basic_feature*> & f_l)
@@ -78,7 +78,7 @@ custom_func * make_custom_func(const std::string & n, const std::vector<basic_fe
 extern void generate_perf_trace();
 
 /*
-    Econdes the performance stats in Freud's binary format
+    Encodes the performance stats in Freud's binary format
     so that it can be read by freud-statistics.
 */
 extern void encode_perf_trace(std::ofstream & output, custom_func * f);

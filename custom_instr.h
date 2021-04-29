@@ -30,6 +30,7 @@
 #define TRACE_LOGFILE  "trace_log.txt"
 #define MERGED_LOGFILE "merged_log.txt"
 
+// Must be in chrono::
 #define TIMER_PRECISION milliseconds
 #define TIMER_UNIT "ms"
 
@@ -62,11 +63,11 @@ extern std::ofstream log_p;
 
 /*
 	Writes the given string to the log file.
-	Format:  time_elapsed function_name event [params]
+	Output format:  time_elapsed function_name event [params]
 	Example: 150 do_stuff RPC_start
 	Example: 152 do_stuff malloc 10
 */
-extern void write_log(std::string msg);
+extern void write_log(std::string func_name, std::string msg);
 
 /*
 	A custom malloc implementation that writes to the log
