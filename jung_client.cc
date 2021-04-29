@@ -20,6 +20,7 @@
 #include <memory>
 #include <stdlib.h>
 #include <string>
+#include <filesystem>
 
 #include <grpcpp/grpcpp.h>
 
@@ -29,6 +30,8 @@
 
 #define SERVER_PORT 50051
 #define NUM_MSG 10
+#define NUM_MSG_SHORT 2
+#define CLEAR_LOG true
 
 using grpc::Channel;
 using grpc::ClientContext;
@@ -102,43 +105,44 @@ class JungClient {
 	that should make the complexity scale.
 */
 void do_stuff(unsigned int param) {
-	string func_name =  __func__;
-	start_instrum(__func__, "client", { make_feature("param", param), 
+	string func_name(__func__);
+	func_name += to_string(++uid);
+	start_instrum(func_name, client, { make_feature("param", param), 
 										make_feature("useless", 12.2) });
 
 	JungClient jung(grpc::CreateChannel(
 		server_address, grpc::InsecureChannelCredentials()));
 
 	// Allocate some memory so we can track it
-	custom_malloc(__func__, param);
+	custom_malloc(func_name, param);
 
 	// Send the "ciao" messages
 	for (int i = 0; i < param; ++i) {
 		string message("mamma " + to_string(i));
-		write_log(func_name, " RPC_start");
+		write_log(func_name, "RPC_start");
 		JungReply reply = jung.Greet(message);
 
 		cout << "Sent: " << message << endl;
 		cout << "Received: " << reply.message() << endl;
 
 		// Save the resulting id from the RPC call
-		write_log(func_name, " RPC_end " + to_string(reply.id()));
+		write_log(func_name, "RPC_end " + to_string(reply.id()));
 	}
 
 	// Send the Double messages
 	for (int i = 0; i < param; ++i) {
 		string message(to_string(i));
-		write_log(func_name, " RPC_start");
+		write_log(func_name, "RPC_start");
 		JungReply reply = jung.ReturnDouble(message);
 
 		cout << "Sent: " << message << endl;
 		cout << "Received: " << reply.message() << endl;
 
 		// Save the resulting id from the RPC call
-		write_log(func_name, " RPC_end " + to_string(reply.id()));
+		write_log(func_name, "RPC_end " + to_string(reply.id()));
 	}
 
-	finish_instrum(__func__);
+	finish_instrum(func_name);
 }
 
 /*
@@ -146,7 +150,15 @@ void do_stuff(unsigned int param) {
 	int parameter that should make the complexity scale.
 */
 void do_multi_stuff(unsigned int param) {
-	//TODO
+	string func_name(__func__);
+	func_name += to_string(++uid);
+	start_instrum(func_name, client, { make_feature("param", param), 
+										make_feature("useless", 42069) });
+	
+	cout << "Not implemented yet" << endl;
+	//TODO implement
+
+	finish_instrum(func_name);
 }
 
 int main(int argc, char** argv) {
@@ -172,22 +184,32 @@ int main(int argc, char** argv) {
 					server_address += ":" + to_string(SERVER_PORT);
 				}
 			} else {
-				cout << "The only correct argument syntax is --target=" << endl;
-				return 0;
+				cerr << "Usage: " << argv[0] << " [--target=hostname]" << endl;
+				return EXIT_FAILURE;
 			}
 		} else {
-			cout << "The only acceptable argument is --target=" << endl;
-			return 0;
+			cerr << "Usage: " << argv[0] << " [--target=hostname]" << endl;
+			return EXIT_FAILURE;
 		}
+	}
+
+	if (filesystem::exists(CLIENT_LOGFILE) && CLEAR_LOG) {
+		cout << "Removing previous logs..." << endl;
+		remove(CLIENT_LOGFILE);
 	}
 
 	cout << "Connecting to " << server_address << "..." << endl;
 
-	cout << "Starting RPC test..." << endl;
+	cout << "-> Starting RPC test #1..." << endl;
 	do_stuff(NUM_MSG);
 
-	cout << "Starting multithreaded test..." << endl;
+	cout << "-> Starting RPC test #2..." << endl;
+	do_stuff(NUM_MSG_SHORT);
+
+	cout << "-> Starting multithreaded test..." << endl;
 	do_multi_stuff(NUM_MSG);
 
-	return 0;
+	cout << "-> Done!" << endl;
+
+	return EXIT_SUCCESS;
 }

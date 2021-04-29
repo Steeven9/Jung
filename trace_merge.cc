@@ -21,6 +21,7 @@
 #include <vector>
 #include <string.h>
 #include <tuple>
+#include <map>
 
 #include "trace_merge.h"
 
@@ -175,35 +176,9 @@ void generate_perf_trace() {
     string line;
     vector<string> line_vect;
     size_t pos;
-    custom_func * func;
+    map<string, custom_func *> func_list;
     uint64_t start_time;
     uint64_t RPC_start_time;
-
-    // First line - initialize struct
-    getline(client_log, line);
-    // Separate the line on spaces and put the tokens in vector
-    while ((pos = line.find(" ")) != string::npos) {
-        line_vect.push_back(line.substr(0, pos));
-        line.erase(0, pos + 1);
-    }
-    line_vect.push_back(line);
-
-    if (line_vect[2] == "FUNC_START") {
-        vector<basic_feature*> feature_list;
-        string param_name;
-        string param_value;
-        for (int i = 3; i < line_vect.size(); ++i) {
-            param_name = line_vect[i].substr(0, line_vect[i].find("="));
-            param_value = line_vect[i].substr(line_vect[i].find("=") + 1);
-            feature_list.push_back(make_feature(param_name, param_value));
-        }
-        
-        func = make_custom_func(line_vect[1], feature_list);
-        start_time = stol(line_vect[0]);
-    } else {
-        cerr << "Error: incorrect logfile format (no start)" << endl;
-        exit(EXIT_FAILURE);
-    }
 
     // Get the client logfile line by line
     while(getline(client_log, line)) {
@@ -216,15 +191,29 @@ void generate_perf_trace() {
         }
         line_vect.push_back(line);
 
+        if (line_vect[2] == "FUNC_START") {
+            vector<basic_feature*> feature_list;
+            string param_name;
+            string param_value;
+            for (int i = 3; i < line_vect.size(); ++i) {
+                param_name = line_vect[i].substr(0, line_vect[i].find("="));
+                param_value = line_vect[i].substr(line_vect[i].find("=") + 1);
+                feature_list.push_back(make_feature(param_name, param_value));
+            }
+            
+            func_list[line_vect[1]] = make_custom_func(line_vect[1], feature_list);
+            start_time = stol(line_vect[0]);
+        }
+
         // Memory allocation
         if (line_vect[2] == "malloc") {
-            func->memory_usage += stoi(line_vect[3]);
-            ++func->mem_leaks;
+            func_list[line_vect[1]]->memory_usage += stoi(line_vect[3]);
+            ++func_list[line_vect[1]]->mem_leaks;
         }
 
         //Memory freeing
         if (line_vect[2] == "free") {
-            --func->mem_leaks;
+            --func_list[line_vect[1]]->mem_leaks;
         }
 
         // RPC start
@@ -238,27 +227,27 @@ void generate_perf_trace() {
         // RPC end
         if (line_vect[2] == "RPC_end") {
             uint64_t server_time = calc_server_time(line_vect[3]);
-            func->server_time += server_time;
-            func->network_time += stol(line_vect[0]) - RPC_start_time - server_time;
+            func_list[line_vect[1]]->server_time += server_time;
+            func_list[line_vect[1]]->network_time += stol(line_vect[0]) - RPC_start_time - server_time;
 
             tuple<uint64_t, uint64_t> server_mem = calc_server_memory(line_vect[3]);
-            func->server_memory += get<0>(server_mem);
-            func->server_memory_leaks += get<1>(server_mem);
+            func_list[line_vect[1]]->server_memory += get<0>(server_mem);
+            func_list[line_vect[1]]->server_memory_leaks += get<1>(server_mem);
 
             tuple<uint64_t, uint64_t> server_faults = calc_server_pagefaults(line_vect[3]);
-            func->min_pagefault += get<0>(server_faults);
-            func->maj_pagefault += get<1>(server_faults);
+            func_list[line_vect[1]]->min_pagefault += get<0>(server_faults);
+            func_list[line_vect[1]]->maj_pagefault += get<1>(server_faults);
         }
 
         // Pagefault (minor and major)
         if (line_vect[2] == "pagefault") {
-            func->min_pagefault += stoi(line_vect[3]);
-            func->maj_pagefault += stoi(line_vect[4]);
+            func_list[line_vect[1]]->min_pagefault += stoi(line_vect[3]);
+            func_list[line_vect[1]]->maj_pagefault += stoi(line_vect[4]);
         }
 
         // Function end - done
         if (line_vect[2] == "FUNC_END") {
-            func->exec_time = stol(line_vect[0]) - start_time;
+            func_list[line_vect[1]]->exec_time = stol(line_vect[0]) - start_time;
         }
     }
 
@@ -269,9 +258,10 @@ void generate_perf_trace() {
         exit(EXIT_FAILURE);
     }
 
-    cout << func->print() << endl;
-
-    encode_perf_trace(trace_log, func);
+    for (const auto& f : func_list) {
+        cout << f.second->print() << "\n" << endl;
+        encode_perf_trace(trace_log, f.second);
+    }
 
     client_log.close();
     trace_log.close();
@@ -336,8 +326,11 @@ int main(int argc, char** argv) {
             simple_merge();
         } else {
             cerr << "Usage: " << argv[0] << " [--simple]" << endl;
+            return EXIT_FAILURE;
         }
     } else {
         generate_perf_trace();
-    }    
+    }
+
+    return EXIT_SUCCESS;
 }

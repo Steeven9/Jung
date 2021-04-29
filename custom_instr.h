@@ -34,6 +34,8 @@
 #define TIMER_PRECISION milliseconds
 #define TIMER_UNIT "ms"
 
+enum Side { client, server };
+
 class basic_feature {
 public:
     virtual std::string print() const = 0;
@@ -60,6 +62,7 @@ feature<T> * make_feature(const std::string & n, const T & v) {
 }
 
 extern std::ofstream log_p;
+extern uint32_t uid;
 
 /*
 	Writes the given string to the log file.
@@ -92,9 +95,9 @@ extern void custom_free(std::string func_name, void* ptr);
 
 /*
 	Starts our custom instrumentation.
-	Side is either "server" or "client".
+	Side is either server or client.
 */
-extern void start_instrum(std::string func_name, std::string side, 
+extern void start_instrum(std::string func_name, Side side, 
  const std::vector<basic_feature*> & feature_list);
 
 /*

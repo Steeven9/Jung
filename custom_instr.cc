@@ -31,6 +31,7 @@ using namespace std;
 
 ofstream log_p;
 chrono::time_point<chrono::steady_clock> start_time;
+uint32_t uid = 0;
 
 void write_log(string func_name, string msg) {
 	// Get current relative timestamp
@@ -46,7 +47,7 @@ void* custom_malloc(string func_name, size_t size) {
 		cerr << "Error: cannot allocate memory" << endl;
 		exit(EXIT_FAILURE);
 	}
-	write_log(func_name, " malloc " + to_string(size));
+	write_log(func_name, "malloc " + to_string(size));
 	return ptr;
 }
 
@@ -58,7 +59,7 @@ void* custom_realloc(string func_name, void * ptr, size_t size) {
 		new_ptr = custom_malloc(func_name, size);
 	} else {
 		new_ptr = realloc(ptr, size);
-		write_log(func_name, " realloc " + to_string(size));
+		write_log(func_name, "realloc " + to_string(size));
 	}
 	
 	if (!new_ptr) {
@@ -73,17 +74,17 @@ void custom_free(string func_name, void* ptr) {
 		cerr << "Error: cannot free memory" << endl;
 		exit(EXIT_FAILURE);
 	}
-	write_log(func_name, " free");
+	write_log(func_name, "free");
 	free(ptr);
 }
 
-void start_instrum(string func_name, string side,
+void start_instrum(string func_name, Side side,
  const vector<basic_feature*> & feature_list) {
-	if (side == "server") {
+	if (side == server) {
 		// Append instead of overwrite
 		log_p.open(SERVER_LOGFILE, ofstream::app);
-	} else if (side == "client") {
-		log_p.open(CLIENT_LOGFILE);
+	} else if (side == client) {
+		log_p.open(CLIENT_LOGFILE, ofstream::app);
 	} else {
 		cerr << "Error: incorrect parameter " << side << " (start_instrum)" << endl;
         exit(EXIT_FAILURE);
@@ -96,7 +97,7 @@ void start_instrum(string func_name, string side,
 
 	start_time = chrono::steady_clock::now();
 
-	string msg = " FUNC_START";
+	string msg = "FUNC_START";
 	for (auto f : feature_list) {
 		msg += " ";
 		msg += f->print();
@@ -109,7 +110,7 @@ void finish_instrum(string func_name) {
 	struct rusage data;
 	//RUSAGE_THREAD is not defined on darwin so we use SELF for portability
 	getrusage(RUSAGE_SELF, &data);
-	write_log(func_name, " pagefault " + to_string(data.ru_minflt) + " " + to_string(data.ru_majflt));
-	write_log(func_name, " FUNC_END");
+	write_log(func_name, "pagefault " + to_string(data.ru_minflt) + " " + to_string(data.ru_majflt));
+	write_log(func_name, "FUNC_END");
 	log_p.close();
 }

@@ -53,7 +53,7 @@ class JungServiceImpl final : public Jung::Service {
 					JungReply* reply) override {
 		string func_name =  __func__;
 		func_name += " " + to_string(++reply_id);
-		start_instrum(func_name, "server", { make_feature("msg_len", request->message().length()) });
+		start_instrum(func_name, server, { make_feature("msg_len", request->message().length()) });
 
 		//Allocate a byte of memory but free it immediately
 		void* mem_p = custom_malloc(func_name, 1);
@@ -74,7 +74,7 @@ class JungServiceImpl final : public Jung::Service {
 							JungReply* reply) override {
 		string func_name =  __func__;
 		func_name += " " + to_string(++reply_id);
-		start_instrum(func_name, "server", { make_feature("d", stoi(request->message())) });
+		start_instrum(func_name, server, { make_feature("d", stoi(request->message())) });
 
 		reply->set_message(to_string(stoi(request->message()) * 2));
 		reply->set_id(reply_id);

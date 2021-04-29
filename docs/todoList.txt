@@ -13,6 +13,7 @@ Done so far
 - develop a tool to merge the performance logs from client and server
 - add pagefaults stat with getrusage(RUSAGE_THREAD, struct rusage *usage)
 - change ints to unints_32 or 64 (based on freud)
+- support multiple functions and re-runs of the same function via a uid
 
 
 TODO for next step
