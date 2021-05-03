@@ -180,6 +180,9 @@ void generate_perf_trace() {
     uint64_t start_time;
     uint64_t RPC_start_time;
 
+    //TODO support for non-linear function execution
+    //(e.g. F1_start F2_start F2_end F1_end)
+
     // Get the client logfile line by line
     while(getline(client_log, line)) {
         line_vect.clear();
@@ -221,9 +224,6 @@ void generate_perf_trace() {
             RPC_start_time = stol(line_vect[0]);
         }
 
-        //TODO add support for custom_pthread_mutex_lock, custom_pthread_mutex_trylock, 
-        //custom_pthread_mutex_unlock, custom_pthread_cond_wait, custom_pthread_cond_timedwait
-
         // RPC end
         if (line_vect[2] == "RPC_end") {
             uint64_t server_time = calc_server_time(line_vect[3]);
@@ -243,6 +243,26 @@ void generate_perf_trace() {
         if (line_vect[2] == "pagefault") {
             func_list[line_vect[1]]->min_pagefault += stoi(line_vect[3]);
             func_list[line_vect[1]]->maj_pagefault += stoi(line_vect[4]);
+        }
+
+        // Waiting time (lock)
+        if (line_vect[2] == "mutex_lock_returned") {
+            //TODO
+        }
+
+        // Lock holding time
+        if (line_vect[2] == "mutex_unlock_returned") {
+            //TODO
+        }
+
+        // Waiting time (cond_wait)
+        if (line_vect[2] == "cond_wait_returned") {
+            //TODO
+        }
+
+        // Waiting time (cond_wait)
+        if (line_vect[2] == "cond_timedwait_returned") {
+            //TODO
         }
 
         // Function end - done

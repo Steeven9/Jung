@@ -82,7 +82,7 @@ extern void* custom_malloc(std::string func_name, size_t size);
 	A custom realloc implementation that writes to the log
 	how much memory has been reallocated (if any).
 */
-extern void* custom_realloc(std::string func_name, void * ptr, size_t size);
+extern void* custom_realloc(std::string func_name, void* ptr, size_t size);
 
 /*
 	A custom free implementation that writes to the log
@@ -90,8 +90,35 @@ extern void* custom_realloc(std::string func_name, void * ptr, size_t size);
 */
 extern void custom_free(std::string func_name, void* ptr);
 
-//TODO add custom_pthread_mutex_lock, custom_pthread_mutex_trylock, 
-//custom_pthread_mutex_unlock, custom_pthread_cond_wait, custom_pthread_cond_timedwait
+/*
+	A custom mutex_lock implementation that writes 
+	to the log how much time it waited for the lock.
+*/
+extern int custom_pthread_mutex_lock(std::string func_name, pthread_mutex_t* mutex);
+
+/*
+	A custom mutex_trylock implementation.
+*/
+extern int custom_pthread_mutex_trylock(std::string func_name, pthread_mutex_t* mutex);
+
+/*
+	A custom mutex_unlock implementation that writes 
+	to the log how much time it held the lock.
+*/
+extern int custom_pthread_mutex_unlock(std::string func_name, pthread_mutex_t* mutex);
+
+/*
+	A custom cond_wait implementation that writes 
+	to the log how much time it waited for the condition.
+*/
+extern int custom_pthread_cond_wait(std::string func_name, pthread_cond_t* cond, pthread_mutex_t* mutex);
+
+/*
+	A custom cond_timedwait implementation that writes 
+	to the log how much time it waited for the condition.
+*/
+extern int custom_pthread_cond_timedwait(std::string func_name, pthread_cond_t* cond, 
+	pthread_mutex_t* mutex, const struct timespec* abstime);
 
 /*
 	Starts our custom instrumentation.

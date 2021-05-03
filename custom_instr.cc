@@ -78,6 +78,42 @@ void custom_free(string func_name, void* ptr) {
 	free(ptr);
 }
 
+int custom_pthread_mutex_lock(std::string func_name, pthread_mutex_t* mutex) {
+	write_log(func_name, "mutex_lock_called");
+	int result = pthread_mutex_lock(mutex);
+	write_log(func_name, "mutex_lock_returned");
+	return result;
+}
+
+int custom_pthread_mutex_trylock(std::string func_name, pthread_mutex_t* mutex) {
+	write_log(func_name, "mutex_trylock_called");
+	int result = pthread_mutex_trylock(mutex);
+	write_log(func_name, "mutex_trylock_returned");
+	return result;
+}
+
+int custom_pthread_mutex_unlock(std::string func_name, pthread_mutex_t* mutex) {
+	write_log(func_name, "mutex_unlock_called");
+	int result = pthread_mutex_unlock(mutex);
+	write_log(func_name, "mutex_unlock_returned");
+	return result;
+}
+
+int custom_pthread_cond_wait(std::string func_name, pthread_cond_t* cond, pthread_mutex_t* mutex) {
+	write_log(func_name, "cond_wait_called");
+	int result = pthread_cond_wait(cond, mutex);
+	write_log(func_name, "cond_wait_returned");
+	return result;
+}
+
+int custom_pthread_cond_timedwait(std::string func_name, pthread_cond_t* cond, 
+ pthread_mutex_t* mutex, const struct timespec* abstime) {
+	write_log(func_name, "cond_timedwait_called");
+	int result = pthread_cond_timedwait(cond, mutex, abstime);
+	write_log(func_name, "cond_timedwait_returned");
+	return result;
+}
+
 void start_instrum(string func_name, Side side,
  const vector<basic_feature*> & feature_list) {
 	if (side == server) {

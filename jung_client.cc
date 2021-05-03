@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string>
 #include <filesystem>
+#include <thread>
 
 #include <grpcpp/grpcpp.h>
 
@@ -155,8 +156,16 @@ void do_multi_stuff(unsigned int param) {
 	start_instrum(func_name, client, { make_feature("param", param), 
 										make_feature("useless", 42069) });
 	
-	cout << "Not implemented yet" << endl;
-	//TODO implement
+	pthread_mutex_t lock;
+	pthread_mutex_init(&lock, NULL);
+
+	// Wait for 0 sec and hold for param sec
+	custom_pthread_mutex_lock(func_name, &lock);
+	cout << "Holding for " << param << " seconds..." << endl;
+	this_thread::sleep_for(chrono::seconds(param));
+	custom_pthread_mutex_unlock(func_name, &lock);
+
+	//TODO expand
 
 	finish_instrum(func_name);
 }
@@ -207,7 +216,7 @@ int main(int argc, char** argv) {
 	do_stuff(NUM_MSG_SHORT);
 
 	cout << "-> Starting multithreaded test..." << endl;
-	do_multi_stuff(NUM_MSG);
+	do_multi_stuff(NUM_MSG_SHORT);
 
 	cout << "-> Done!" << endl;
 
