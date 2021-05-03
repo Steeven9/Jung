@@ -33,10 +33,11 @@ Then, in another terminal, run the client
 
 `./jung_client`
 
-This will produce two files, `client_log.txt` and `server_log.txt`, that can be merged in a unique trace by running `./trace_merge`. 
-This will in turn produce a unique `trace_log.txt` that contains the unified costs encoded in binary format. 
+This will produce two files, `client_log.txt` and `server_log.txt`, that can be merged in a unique trace by running `./trace_merge`. If your server is running on another machine, be sure to retrieve the logfile before merging!
+This will in turn produce a human-readable file (`trace_log.txt`) and a `symbols` folder that contains the unified costs
+encoded in binary format. These can then be read by `freud-statistics` (see the [original repo](https://github.com/usi-systems/freud) for instructions).
+
 Alternatively, by running `./trace_merge --simple`, a simple merged log (`merged_log.txt`) can be optained instead.
-If your server is running on another machine, be sure to retrieve the logfile before merging.
 
 _Note_: all the file names are customizable in `custom_instr.h`.
 
@@ -65,4 +66,13 @@ to the client as parameter (port is `50051` by default, editable in `jung_server
 If you want to measure your own application, simply include `custom_instr.h`, which provides all the necessary
 functions to manage the instrumentation. Make sure to also include the corresponding `.cc` file in your compilation unit.
 
+The instrumentation is manual, so you will need to replace by hand all the functions like `malloc` with the library version
+(e.g. `custom_malloc`) that are defined in `custom_instr.h`.
+
 To merge the obtained traces, compile and run `trace_merge.cc` (which requires `custom_instr.h` as well).
+
+
+## Contributions
+
+This project includes some code from the [gRPC examples](https://github.com/grpc/grpc/tree/master/examples/cpp) and 
+[Freud](https://github.com/usi-systems/freud). Thank you to the original authors!

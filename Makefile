@@ -48,6 +48,7 @@ jung_server: jung.pb.o jung.grpc.pb.o jung_server.o custom_instr.o
 
 clean:
 	rm -f *.o *.pb.cc *.pb.h jung_client jung_server trace_merge *_log.txt
+	rm -rf symbols
 
 
 # The following is to test your system and ensure a smoother experience.

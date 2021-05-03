@@ -2,6 +2,7 @@
 .idea/
 pin/
 *_log.txt
+symbols/
 
 # MS Office
 ~$*

@@ -21,7 +21,8 @@
 #include <vector>
 #include <string.h>
 #include <tuple>
-#include <map>
+#include <unordered_map>
+#include <sys/stat.h>
 
 #include "trace_merge.h"
 
@@ -176,7 +177,7 @@ void generate_perf_trace() {
     string line;
     vector<string> line_vect;
     size_t pos;
-    map<string, custom_func *> func_list;
+    unordered_map<string, custom_func *> func_list;
     uint64_t start_time;
     uint64_t RPC_start_time;
 
@@ -231,12 +232,12 @@ void generate_perf_trace() {
             func_list[line_vect[1]]->network_time += stol(line_vect[0]) - RPC_start_time - server_time;
 
             tuple<uint64_t, uint64_t> server_mem = calc_server_memory(line_vect[3]);
-            func_list[line_vect[1]]->server_memory += get<0>(server_mem);
-            func_list[line_vect[1]]->server_memory_leaks += get<1>(server_mem);
+            func_list[line_vect[1]]->server_memory_usage += get<0>(server_mem);
+            func_list[line_vect[1]]->server_mem_leaks += get<1>(server_mem);
 
-            tuple<uint64_t, uint64_t> server_faults = calc_server_pagefaults(line_vect[3]);
-            func_list[line_vect[1]]->min_pagefault += get<0>(server_faults);
-            func_list[line_vect[1]]->maj_pagefault += get<1>(server_faults);
+            tuple<uint64_t, uint64_t> server_pagefaults = calc_server_pagefaults(line_vect[3]);
+            func_list[line_vect[1]]->server_min_pagefault += get<0>(server_pagefaults);
+            func_list[line_vect[1]]->server_maj_pagefault += get<1>(server_pagefaults);
         }
 
         // Pagefault (minor and major)
@@ -280,16 +281,69 @@ void generate_perf_trace() {
 
     for (const auto& f : func_list) {
         cout << f.second->print() << "\n" << endl;
-        encode_perf_trace(trace_log, f.second);
+        trace_log << f.second->print() << "\n" << endl;
     }
+
+    encode_perf_trace(func_list);
 
     client_log.close();
     trace_log.close();
 }
 
-void encode_perf_trace(ofstream & output, custom_func * f) {
-    //TODO encode output in binary
-    output << f->print() << endl;
+void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
+    string rtn_name = "asd";    //TODO figure out this one
+    time_t now = time(NULL);
+    stringstream now_ss;
+    now_ss.str("");
+    mkdir("symbols/", S_IRWXU | S_IRWXG);
+    string folder = "symbols/" + rtn_name;
+    now_ss << folder << "/idcm_" << rtn_name << "_" << now << ".bin";
+
+    mkdir(folder.c_str(), S_IRWXU | S_IRWXG);
+    ofstream out_file(now_ss.str().c_str(), ios::binary);
+    if (!out_file.is_open()) {
+        cerr << "Error: cannot open " << now_ss.str() << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    // Function name
+    uint32_t name_len = rtn_name.size();
+    out_file.write((char *)&name_len, sizeof(uint32_t));
+    out_file.write(rtn_name.c_str(), sizeof(char) * name_len);
+
+    //TODO Feature names
+
+    //TODO Type names(?)
+
+    // Uid and metrics
+    for (const auto& f : func_list) {
+        uint64_t tot_mem = f.second->memory_usage + f.second->server_memory_usage;
+        uint64_t tot_lock_holding_time = f.second->server_lock_holding_time + f.second->lock_holding_time;
+        uint64_t tot_waiting_time = f.second->server_waiting_time + f.second->waiting_time;
+        uint64_t tot_min_faults = f.second->server_min_pagefault + f.second->min_pagefault;
+        uint64_t tot_maj_faults = f.second->server_maj_pagefault + f.second->maj_pagefault;
+        out_file.write(f.second->name.data(), sizeof(uint32_t));    // This should be a uid
+        out_file.write((char *)&f.second->exec_time, sizeof(uint64_t));
+        out_file.write((char *)&tot_mem, sizeof(uint64_t));
+        out_file.write((char *)&tot_lock_holding_time, sizeof(uint64_t));
+        out_file.write((char *)&tot_waiting_time, sizeof(uint64_t));
+        out_file.write((char *)&tot_min_faults, sizeof(uint64_t));
+        out_file.write((char *)&tot_maj_faults, sizeof(uint64_t));
+    }
+
+    //TODO Num of features
+
+    //TODO Local and global features(?)
+
+    //TODO System features(?)
+
+    // Branches (not used)
+    uint32_t num_of_branches = 0;
+    out_file.write((char *)&num_of_branches, sizeof(uint32_t));
+
+    // Children (not used)
+    uint32_t num_of_children = 0;
+    out_file.write((char *)&num_of_children, sizeof(uint32_t));
 }
 
 void simple_merge() {

@@ -29,12 +29,18 @@ struct custom_func {
     uint64_t exec_time = 0;
     uint64_t network_time = 0;
     uint64_t server_time = 0;
+    uint64_t lock_holding_time = 0;
+    uint64_t waiting_time = 0;
+    uint64_t server_lock_holding_time = 0;
+    uint64_t server_waiting_time = 0;
     uint64_t memory_usage = 0;
-    uint64_t server_memory = 0;
+    uint64_t server_memory_usage = 0;
     uint64_t mem_leaks = 0;
-    uint64_t server_memory_leaks = 0;
+    uint64_t server_mem_leaks = 0;
     uint64_t min_pagefault = 0;
     uint64_t maj_pagefault = 0;
+    uint64_t server_min_pagefault = 0;
+    uint64_t server_maj_pagefault = 0;
     const std::vector<basic_feature*> feature_list;
 
     custom_func(const std::string & n, const std::vector<basic_feature*> & f_l)
@@ -44,15 +50,17 @@ struct custom_func {
         std::string msg = name + " took " + std::to_string(exec_time) + " " + TIMER_UNIT + ", of which approx. " + 
             std::to_string(network_time) + " " + TIMER_UNIT + " in network and approx. " + std::to_string(server_time) + 
             " " + TIMER_UNIT + " in server.\nUsed " + std::to_string(memory_usage) + " bytes of memory client-side and " + 
-            std::to_string(server_memory) + " bytes of memory server-side.\nThere were " + std::to_string(min_pagefault) + 
-            " minor pagefaults and " + std::to_string(maj_pagefault) + " major ones.";
+            std::to_string(server_memory_usage) + " bytes of memory server-side.\nThere were " + std::to_string(min_pagefault) + 
+            " minor pagefaults and " + std::to_string(maj_pagefault) + " major ones client-side; " 
+            + std::to_string(server_min_pagefault) + " minor pagefaults and " + std::to_string(server_maj_pagefault) + 
+            " major ones server-side.";
 
         if (mem_leaks > 0) {
             msg += "\nPossible client memory leak detected! " + std::to_string(mem_leaks) + " malloc call(s) not freed.";
         }
 
-        if (server_memory_leaks > 0) {
-            msg += "\nPossible server memory leak detected! " + std::to_string(server_memory_leaks) + " malloc call(s) not freed.";
+        if (server_mem_leaks > 0) {
+            msg += "\nPossible server memory leak detected! " + std::to_string(server_mem_leaks) + " malloc call(s) not freed.";
         }
 
         if (feature_list.size() > 0) {
@@ -80,8 +88,9 @@ extern void generate_perf_trace();
 /*
     Encodes the performance stats in Freud's binary format
     so that it can be read by freud-statistics.
+    See https://github.com/usi-systems/freud/blob/master/freud-pin/dumper.cc
 */
-extern void encode_perf_trace(std::ofstream & output, custom_func * f);
+extern void encode_perf_trace(std::unordered_map<std::string, custom_func *> func_list);
 
 /* 
     Reads a line from the client log, then if there
