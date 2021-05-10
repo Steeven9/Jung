@@ -24,13 +24,14 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <chrono>
 
 #define SERVER_LOGFILE "server_log.txt"
 #define CLIENT_LOGFILE "client_log.txt"
 #define TRACE_LOGFILE  "trace_log.txt"
 #define MERGED_LOGFILE "merged_log.txt"
 
-// Must be in chrono::
+// Must be in std::chrono
 #define TIMER_PRECISION milliseconds
 #define TIMER_UNIT "ms"
 
@@ -61,8 +62,18 @@ feature<T> * make_feature(const std::string & n, const T & v) {
     return new feature<T>(n, v);
 }
 
+struct custom_mutex {
+	std::chrono::time_point<std::chrono::steady_clock> hold_start_time;
+	pthread_mutex_t* mutex;
+};
+
 extern std::ofstream log_p;
 extern uint32_t uid;
+
+/*
+	Initializes our custom mutex struct.
+*/
+extern int custom_mutex_init(custom_mutex *, const pthread_mutexattr_t *);
 
 /*
 	Writes the given string to the log file.
@@ -81,6 +92,7 @@ extern void* custom_malloc(std::string func_name, size_t size);
 /*
 	A custom realloc implementation that writes to the log
 	how much memory has been reallocated (if any).
+	Note: logging might be unreliable or imprecise.
 */
 extern void* custom_realloc(std::string func_name, void* ptr, size_t size);
 
@@ -94,31 +106,31 @@ extern void custom_free(std::string func_name, void* ptr);
 	A custom mutex_lock implementation that writes 
 	to the log how much time it waited for the lock.
 */
-extern int custom_pthread_mutex_lock(std::string func_name, pthread_mutex_t* mutex);
+extern int custom_pthread_mutex_lock(std::string func_name, struct custom_mutex* mutex);
 
 /*
 	A custom mutex_trylock implementation.
 */
-extern int custom_pthread_mutex_trylock(std::string func_name, pthread_mutex_t* mutex);
+extern int custom_pthread_mutex_trylock(std::string func_name, struct custom_mutex* mutex);
 
 /*
 	A custom mutex_unlock implementation that writes 
 	to the log how much time it held the lock.
 */
-extern int custom_pthread_mutex_unlock(std::string func_name, pthread_mutex_t* mutex);
+extern int custom_pthread_mutex_unlock(std::string func_name, struct custom_mutex* mutex);
 
 /*
 	A custom cond_wait implementation that writes 
 	to the log how much time it waited for the condition.
 */
-extern int custom_pthread_cond_wait(std::string func_name, pthread_cond_t* cond, pthread_mutex_t* mutex);
+extern int custom_pthread_cond_wait(std::string func_name, pthread_cond_t* cond, struct custom_mutex* mutex);
 
 /*
 	A custom cond_timedwait implementation that writes 
 	to the log how much time it waited for the condition.
 */
 extern int custom_pthread_cond_timedwait(std::string func_name, pthread_cond_t* cond, 
-	pthread_mutex_t* mutex, const struct timespec* abstime);
+	struct custom_mutex* mutex, const struct timespec* abstime);
 
 /*
 	Starts our custom instrumentation.

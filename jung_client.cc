@@ -32,6 +32,7 @@
 #define SERVER_PORT 50051
 #define NUM_MSG 10
 #define NUM_MSG_SHORT 2
+#define NUM_THREADS 2
 #define CLEAR_LOG true
 
 using grpc::Channel;
@@ -150,22 +151,19 @@ void do_stuff(unsigned int param) {
 	A multithreaded function to be analyzed. Takes an 
 	int parameter that should make the complexity scale.
 */
-void do_multi_stuff(unsigned int param) {
+void do_multi_stuff(unsigned int param, struct custom_mutex * mutex) {
 	string func_name(__func__);
 	func_name += to_string(++uid);
 	start_instrum(func_name, client, { make_feature("param", param), 
 										make_feature("useless", 42069) });
-	
-	pthread_mutex_t lock;
-	pthread_mutex_init(&lock, NULL);
 
-	// Wait for 0 sec and hold for param sec
-	custom_pthread_mutex_lock(func_name, &lock);
-	cout << "Holding for " << param << " seconds..." << endl;
+	cout << "T" << this_thread::get_id() << " waiting for lock..." << endl;
+	// Acquire lock and hold for param sec
+	custom_pthread_mutex_lock(func_name, mutex);
+	cout << "T" << this_thread::get_id() << " holding for " << param << " seconds..." << endl;
 	this_thread::sleep_for(chrono::seconds(param));
-	custom_pthread_mutex_unlock(func_name, &lock);
-
-	//TODO expand
+	custom_pthread_mutex_unlock(func_name, mutex);
+	cout << "T" << this_thread::get_id() << " releasing lock..." << endl;
 
 	finish_instrum(func_name);
 }
@@ -210,13 +208,25 @@ int main(int argc, char** argv) {
 	cout << "Connecting to " << server_address << "..." << endl;
 
 	cout << "-> Starting RPC test #1..." << endl;
-	do_stuff(NUM_MSG);
+	//do_stuff(NUM_MSG);
 
 	cout << "-> Starting RPC test #2..." << endl;
-	do_stuff(NUM_MSG_SHORT);
+	//do_stuff(NUM_MSG_SHORT);
 
 	cout << "-> Starting multithreaded test..." << endl;
-	do_multi_stuff(NUM_MSG_SHORT);
+	struct custom_mutex lock;
+	pthread_mutex_t m;
+	lock.mutex = &m;
+	custom_mutex_init(&lock, NULL);
+
+	vector<thread> threads;
+	for (int i = 0; i < NUM_THREADS; ++i) {
+		threads.push_back(thread(do_multi_stuff, NUM_MSG_SHORT, &lock));
+	}
+	
+	for (auto &th : threads) {
+		th.join();
+	}
 
 	cout << "-> Done!" << endl;
 

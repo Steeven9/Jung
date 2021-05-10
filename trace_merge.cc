@@ -247,13 +247,13 @@ void generate_perf_trace() {
         }
 
         // Waiting time (lock)
-        if (line_vect[2] == "mutex_lock_returned") {
-            //TODO
+        if (line_vect[2] == "mutex_lock") {
+            func_list[line_vect[1]]->waiting_time += stoi(line_vect[3]);
         }
 
         // Lock holding time
-        if (line_vect[2] == "mutex_unlock_returned") {
-            //TODO
+        if (line_vect[2] == "mutex_unlock") {
+            func_list[line_vect[1]]->lock_holding_time += stoi(line_vect[3]);
         }
 
         // Waiting time (cond_wait)

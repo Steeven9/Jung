@@ -53,7 +53,8 @@ struct custom_func {
             std::to_string(server_memory_usage) + " bytes of memory server-side.\nThere were " + std::to_string(min_pagefault) + 
             " minor pagefaults and " + std::to_string(maj_pagefault) + " major ones client-side; " 
             + std::to_string(server_min_pagefault) + " minor pagefaults and " + std::to_string(server_maj_pagefault) + 
-            " major ones server-side.";
+            " major ones server-side.\nWaited for " + std::to_string(waiting_time) + " " + TIMER_UNIT + " and held lock for " + 
+            std::to_string(lock_holding_time) + " " + TIMER_UNIT + ".";
 
         if (mem_leaks > 0) {
             msg += "\nPossible client memory leak detected! " + std::to_string(mem_leaks) + " malloc call(s) not freed.";
