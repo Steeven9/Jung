@@ -144,4 +144,15 @@ extern void start_instrum(std::string func_name, Side side,
 */
 extern void finish_instrum(std::string func_name);
 
+/* 
+	Dumps the content of the log buffer to the disk.
+*/
+extern void dump_log();
+
+/* 
+	Prints the given error message, dumps the log to
+	the disk and exits returning a failure code.
+*/
+extern void handle_error(std::string msg, int error_code = EXIT_FAILURE);
+
 #endif

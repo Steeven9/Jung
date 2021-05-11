@@ -208,10 +208,10 @@ int main(int argc, char** argv) {
 	cout << "Connecting to " << server_address << "..." << endl;
 
 	cout << "-> Starting RPC test #1..." << endl;
-	//do_stuff(NUM_MSG);
+	do_stuff(NUM_MSG);
 
 	cout << "-> Starting RPC test #2..." << endl;
-	//do_stuff(NUM_MSG_SHORT);
+	do_stuff(NUM_MSG_SHORT);
 
 	cout << "-> Starting multithreaded test..." << endl;
 	struct custom_mutex lock;

@@ -291,32 +291,32 @@ void generate_perf_trace() {
 }
 
 void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
-    string rtn_name = "asd";    //TODO figure out this one
-    time_t now = time(NULL);
-    stringstream now_ss;
-    now_ss.str("");
-    mkdir("symbols/", S_IRWXU | S_IRWXG);
-    string folder = "symbols/" + rtn_name;
-    now_ss << folder << "/idcm_" << rtn_name << "_" << now << ".bin";
-
-    mkdir(folder.c_str(), S_IRWXU | S_IRWXG);
-    ofstream out_file(now_ss.str().c_str(), ios::binary);
-    if (!out_file.is_open()) {
-        cerr << "Error: cannot open " << now_ss.str() << endl;
-        exit(EXIT_FAILURE);
-    }
-
-    // Function name
-    uint32_t name_len = rtn_name.size();
-    out_file.write((char *)&name_len, sizeof(uint32_t));
-    out_file.write(rtn_name.c_str(), sizeof(char) * name_len);
-
-    //TODO Feature names
-
-    //TODO Type names(?)
-
-    // Uid and metrics
     for (const auto& f : func_list) {
+        string rtn_name = f.second->name;
+        time_t now = time(NULL);
+        stringstream now_ss;
+        now_ss.str("");
+        mkdir("symbols/", S_IRWXU | S_IRWXG);
+        string folder = "symbols/" + rtn_name;
+        now_ss << folder << "/idcm_" << rtn_name << "_" << now << ".bin";
+
+        mkdir(folder.c_str(), S_IRWXU | S_IRWXG);
+        ofstream out_file(now_ss.str().c_str(), ios::binary);
+        if (!out_file.is_open()) {
+            cerr << "Error: cannot open " << now_ss.str() << endl;
+            exit(EXIT_FAILURE);
+        }
+
+        // Function name
+        uint32_t name_len = rtn_name.size();
+        out_file.write((char *)&name_len, sizeof(uint32_t));
+        out_file.write(rtn_name.c_str(), sizeof(char) * name_len);
+
+        //TODO Feature names
+
+        //TODO Type names(?)
+
+        // Uid and metrics
         uint64_t tot_mem = f.second->memory_usage + f.second->server_memory_usage;
         uint64_t tot_lock_holding_time = f.second->server_lock_holding_time + f.second->lock_holding_time;
         uint64_t tot_waiting_time = f.second->server_waiting_time + f.second->waiting_time;
@@ -329,21 +329,23 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
         out_file.write((char *)&tot_waiting_time, sizeof(uint64_t));
         out_file.write((char *)&tot_min_faults, sizeof(uint64_t));
         out_file.write((char *)&tot_maj_faults, sizeof(uint64_t));
+
+        //TODO Num of features
+
+        //TODO Local and global features(?)
+
+        //TODO System features(?)
+
+        // Branches (not used)
+        uint32_t num_of_branches = 0;
+        out_file.write((char *)&num_of_branches, sizeof(uint32_t));
+
+        // Children (not used)
+        uint32_t num_of_children = 0;
+        out_file.write((char *)&num_of_children, sizeof(uint32_t));
+
+        out_file.close();
     }
-
-    //TODO Num of features
-
-    //TODO Local and global features(?)
-
-    //TODO System features(?)
-
-    // Branches (not used)
-    uint32_t num_of_branches = 0;
-    out_file.write((char *)&num_of_branches, sizeof(uint32_t));
-
-    // Children (not used)
-    uint32_t num_of_children = 0;
-    out_file.write((char *)&num_of_children, sizeof(uint32_t));
 }
 
 void simple_merge() {
