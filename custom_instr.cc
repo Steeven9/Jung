@@ -36,7 +36,7 @@ uint32_t uid = 0;
 mutex log_guard;
 mutex dump_guard;
 vector<string> log_buffer;
-Side side;
+Side side_p;
 
 int custom_mutex_init(struct custom_mutex * mutex, const pthread_mutexattr_t * attr) {
 	return pthread_mutex_init(mutex->mutex, attr);
@@ -137,7 +137,7 @@ int custom_pthread_cond_timedwait(string func_name, pthread_cond_t* cond,
 void start_instrum(std::string func_name, Side side, 
  const std::vector<basic_feature*> & feature_list) {
 	start_time = chrono::steady_clock::now();	//TODO fix - make one per function
-	side = side;
+	side_p = side;
 
 	string msg = "FUNC_START";
 	for (auto f : feature_list) {
@@ -166,9 +166,9 @@ void dump_log() {
 	lock_guard<mutex> lock(dump_guard);
 	//TODO move this to a separate shceduled thread
 	// Append instead of overwrite
-	if (side == server) {
+	if (side_p == server) {
 		log_p.open(SERVER_LOGFILE, ofstream::app);
-	} else if (side == client) {
+	} else if (side_p == client) {
 		log_p.open(CLIENT_LOGFILE, ofstream::app);
 	} else {
 		cerr << "Error: incorrect side parameter" << endl;
