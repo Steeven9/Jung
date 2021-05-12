@@ -25,13 +25,14 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <mutex>
+#include <unordered_map>
 
 #include "custom_instr.h"
 
 using namespace std;
 
 ofstream log_p;
-chrono::time_point<chrono::steady_clock> start_time;
+unordered_map<string, chrono::time_point<chrono::steady_clock>> start_times;
 uint32_t uid = 0;
 mutex log_guard;
 mutex dump_guard;
@@ -46,6 +47,7 @@ void write_log(string func_name, string msg) {
 	lock_guard<mutex> lock(log_guard);
 	// Get current relative timestamp
 	const auto now = chrono::steady_clock::now();
+	const auto start_time = start_times[func_name];
 	size_t timestamp = chrono::duration_cast<chrono::TIMER_PRECISION>(now - start_time).count();
 
 	log_buffer.push_back(to_string(timestamp) + " " + func_name + " " + msg);
@@ -136,7 +138,7 @@ int custom_pthread_cond_timedwait(string func_name, pthread_cond_t* cond,
 
 void start_instrum(std::string func_name, Side side, 
  const std::vector<basic_feature*> & feature_list) {
-	start_time = chrono::steady_clock::now();	//TODO fix - make one per function
+	start_times[func_name] = chrono::steady_clock::now();
 	side_p = side;
 
 	string msg = "FUNC_START";

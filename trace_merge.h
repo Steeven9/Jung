@@ -26,6 +26,8 @@
 
 struct custom_func {
     std::string name;
+    uint64_t start_time = 0;
+    uint64_t RPC_start_time = 0;
     uint64_t exec_time = 0;
     uint64_t network_time = 0;
     uint64_t server_time = 0;

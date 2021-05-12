@@ -178,11 +178,6 @@ void generate_perf_trace() {
     vector<string> line_vect;
     size_t pos;
     unordered_map<string, custom_func *> func_list;
-    uint64_t start_time;
-    uint64_t RPC_start_time;
-
-    //TODO support for non-linear function execution
-    //(e.g. F1_start F2_start F2_end F1_end)
 
     // Get the client logfile line by line
     while(getline(client_log, line)) {
@@ -206,7 +201,7 @@ void generate_perf_trace() {
             }
             
             func_list[line_vect[1]] = make_custom_func(line_vect[1], feature_list);
-            start_time = stol(line_vect[0]);
+            func_list[line_vect[1]]->start_time = stol(line_vect[0]);
         }
 
         // Memory allocation
@@ -222,14 +217,15 @@ void generate_perf_trace() {
 
         // RPC start
         if (line_vect[2] == "RPC_start") {
-            RPC_start_time = stol(line_vect[0]);
+            func_list[line_vect[1]]->RPC_start_time = stol(line_vect[0]);
         }
 
         // RPC end
         if (line_vect[2] == "RPC_end") {
             uint64_t server_time = calc_server_time(line_vect[3]);
             func_list[line_vect[1]]->server_time += server_time;
-            func_list[line_vect[1]]->network_time += stol(line_vect[0]) - RPC_start_time - server_time;
+            func_list[line_vect[1]]->network_time += stol(line_vect[0]) - 
+                func_list[line_vect[1]]->RPC_start_time - server_time;
 
             tuple<uint64_t, uint64_t> server_mem = calc_server_memory(line_vect[3]);
             func_list[line_vect[1]]->server_memory_usage += get<0>(server_mem);
@@ -268,12 +264,13 @@ void generate_perf_trace() {
 
         // Function end - done
         if (line_vect[2] == "FUNC_END") {
-            func_list[line_vect[1]]->exec_time = stol(line_vect[0]) - start_time;
+            func_list[line_vect[1]]->exec_time = stol(line_vect[0]) - 
+                func_list[line_vect[1]]->start_time;
         }
     }
 
     if (line_vect[2] == "FUNC_END") {
-        cout << "Trace generation successful" << endl;
+        cout << "Trace generation successful\n" << endl;
     } else {
         cerr << "Error: incorrect logfile format (no end)" << endl;
         exit(EXIT_FAILURE);
