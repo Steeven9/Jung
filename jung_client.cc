@@ -108,7 +108,7 @@ class JungClient {
 */
 void do_stuff(unsigned int param) {
 	string func_name(__func__);
-	func_name += to_string(++uid);
+	func_name += to_string(getNextUid());
 	start_instrum(func_name, client, { make_feature("param", param), 
 										make_feature("useless", 12.2) });
 
@@ -153,7 +153,7 @@ void do_stuff(unsigned int param) {
 */
 void do_multi_stuff(unsigned int param, struct custom_mutex * mutex) {
 	string func_name(__func__);
-	func_name += to_string(++uid);
+	func_name += to_string(getNextUid());
 	start_instrum(func_name, client, { make_feature("param", param), 
 										make_feature("useless", 42069) });
 

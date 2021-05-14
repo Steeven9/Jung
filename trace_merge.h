@@ -21,11 +21,13 @@
 
 #include <string>
 #include <vector>
+#include <regex>
 
 #include "custom_instr.h"
 
 struct custom_func {
     std::string name;
+    uint32_t uid;
     uint64_t start_time = 0;
     uint64_t RPC_start_time = 0;
     uint64_t exec_time = 0;
@@ -79,7 +81,14 @@ struct custom_func {
 
 
 custom_func * make_custom_func(const std::string & n, const std::vector<basic_feature*> & f_l) {
-    return new custom_func(n, f_l);
+    std::string uid = std::regex_replace(
+        n,
+        std::regex("[^0-9]*([0-9]+).*"),
+        std::string("$1")
+    );
+    custom_func * f = new custom_func(n, f_l);
+    f->uid = stoi(uid);
+    return f;
 }
 
 /* 

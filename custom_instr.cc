@@ -34,13 +34,17 @@ using namespace std;
 ofstream log_p;
 unordered_map<string, chrono::time_point<chrono::steady_clock>> start_times;
 uint32_t uid = 0;
-mutex log_guard;
-mutex dump_guard;
+mutex log_guard, dump_guard, uid_guard;
 vector<string> log_buffer;
 Side side_p;
 
 int custom_mutex_init(struct custom_mutex * mutex, const pthread_mutexattr_t * attr) {
 	return pthread_mutex_init(mutex->mutex, attr);
+}
+
+uint32_t getNextUid() {
+	lock_guard<mutex> lock(uid_guard);
+	return ++uid;
 }
 
 void write_log(string func_name, string msg) {

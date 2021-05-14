@@ -76,6 +76,11 @@ extern uint32_t uid;
 extern int custom_mutex_init(custom_mutex *, const pthread_mutexattr_t *);
 
 /*
+	Thread-safely returns a new unique id (uid) for a function.
+*/
+extern uint32_t getNextUid();
+
+/*
 	Writes the given string to the log file.
 	Output format:  time_elapsed function_name event [params]
 	Example: 150 do_stuff RPC_start

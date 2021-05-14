@@ -310,8 +310,16 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
         out_file.write(rtn_name.c_str(), sizeof(char) * name_len);
 
         //TODO Feature names
+        uint32_t tot_fnames = 0;
+		out_file.write((char *)&tot_fnames, sizeof(uint32_t));
 
-        //TODO Type names(?)
+        //TODO Type names
+        uint32_t tot_typenames = 0;
+		out_file.write((char *)&tot_typenames, sizeof(uint32_t));
+
+        // Number of samples (always 1 for us)
+        uint32_t samples_count = 1;
+		out_file.write((char *)&samples_count, sizeof(uint32_t));
 
         // Uid and metrics
         uint64_t tot_mem = f.second->memory_usage + f.second->server_memory_usage;
@@ -319,7 +327,7 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
         uint64_t tot_waiting_time = f.second->server_waiting_time + f.second->waiting_time;
         uint64_t tot_min_faults = f.second->server_min_pagefault + f.second->min_pagefault;
         uint64_t tot_maj_faults = f.second->server_maj_pagefault + f.second->maj_pagefault;
-        out_file.write(f.second->name.data(), sizeof(uint32_t));    // This should be a uid
+        out_file.write((char *)&f.second->uid, sizeof(uint32_t));
         out_file.write((char *)&f.second->exec_time, sizeof(uint64_t));
         out_file.write((char *)&tot_mem, sizeof(uint64_t));
         out_file.write((char *)&tot_lock_holding_time, sizeof(uint64_t));
@@ -328,10 +336,12 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
         out_file.write((char *)&tot_maj_faults, sizeof(uint64_t));
 
         //TODO Num of features
+        uint32_t tot_feats = 0;
+		out_file.write((char *)&tot_feats, sizeof(uint32_t));
 
-        //TODO Local and global features(?)
-
-        //TODO System features(?)
+        // System features (not used)
+        uint32_t tot_sysfeatures = 0;
+		out_file.write((char *)&tot_sysfeatures, sizeof(uint32_t));
 
         // Branches (not used)
         uint32_t num_of_branches = 0;
