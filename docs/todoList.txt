@@ -14,14 +14,14 @@ Done so far
 - add pagefaults stat with getrusage(RUSAGE_THREAD, struct rusage *usage)
 - change ints to unints_32 or 64 (based on freud)
 - support multiple functions and re-runs of the same function via a uid
+- add custom_lock/unlock and custom_wait (->freud-pin.cpp:611)
+- look into condition variables locking
+- add demo with multithreading to test locks stats
 
 
 TODO for next step
 ---------------------
 - improve performace traces format to make it compatible with freud-statistics
-- add custom_lock/unlock and custom_wait (->freud-pin.cpp:611)
-- look into condition variables locking
-- add demo with multithreading to test locks stats
 
 
 TODO for long-term
