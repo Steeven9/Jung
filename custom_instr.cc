@@ -120,19 +120,33 @@ int custom_pthread_mutex_unlock(string func_name, struct custom_mutex* mutex) {
 }
 
 int custom_pthread_cond_wait(string func_name, pthread_cond_t* cond, struct custom_mutex* mutex) {
-	//TODO fix
-	write_log(func_name, "cond_wait_called");
+	// Unlocks mutex (->update holding time), waits on cond (-> add waiting time),
+	// then relocks mutex and returns
+	auto start = chrono::steady_clock::now();
+	size_t hold_time = chrono::duration_cast<chrono::TIMER_PRECISION>(start - mutex->hold_start_time).count();
+	write_log(func_name, "mutex_unlock " + to_string(hold_time) + " [cond_wait]");
+
 	int result = pthread_cond_wait(cond, mutex->mutex);
-	write_log(func_name, "cond_wait_returned");
+	auto now = chrono::steady_clock::now();
+	size_t wait_time = chrono::duration_cast<chrono::TIMER_PRECISION>(start - now).count();
+	mutex->hold_start_time = now;
+	write_log(func_name, "cond_wait_returned " + to_string(wait_time));
 	return result;
 }
 
 int custom_pthread_cond_timedwait(string func_name, pthread_cond_t* cond, 
  struct custom_mutex* mutex, const struct timespec* abstime) {
-	//TODO fix
-	write_log(func_name, "cond_timedwait_called");
+	// Unlocks mutex (->update holding time), waits on cond until abstime
+	// (-> add waiting time) then relocks mutex and returns
+	auto start = chrono::steady_clock::now();
+	size_t hold_time = chrono::duration_cast<chrono::TIMER_PRECISION>(start - mutex->hold_start_time).count();
+	write_log(func_name, "mutex_unlock " + to_string(hold_time) + " [cond_timedwait]");
+
 	int result = pthread_cond_timedwait(cond, mutex->mutex, abstime);
-	write_log(func_name, "cond_timedwait_returned");
+	auto now = chrono::steady_clock::now();
+	size_t wait_time = chrono::duration_cast<chrono::TIMER_PRECISION>(start - now).count();
+	mutex->hold_start_time = now;
+	write_log(func_name, "cond_timedwait_returned " + to_string(wait_time));
 	return result;
 }
 

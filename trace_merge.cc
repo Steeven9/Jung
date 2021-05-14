@@ -254,12 +254,12 @@ void generate_perf_trace() {
 
         // Waiting time (cond_wait)
         if (line_vect[2] == "cond_wait_returned") {
-            //TODO
+            func_list[line_vect[1]]->waiting_time += stoi(line_vect[3]);
         }
 
-        // Waiting time (cond_wait)
+        // Waiting time (cond_timedwait)
         if (line_vect[2] == "cond_timedwait_returned") {
-            //TODO
+            func_list[line_vect[1]]->waiting_time += stoi(line_vect[3]);
         }
 
         // Function end - done
