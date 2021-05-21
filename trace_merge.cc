@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2021 Stefano Taillefert.
+ * Copyright 2021 Stefano Taillefert and Daniele Rogora.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
 #include <string.h>
 #include <tuple>
 #include <unordered_map>
+#include <set>
 #include <sys/stat.h>
 
 #include "trace_merge.h"
@@ -191,13 +192,16 @@ void generate_perf_trace() {
         line_vect.push_back(line);
 
         if (line_vect[2] == "FUNC_START") {
-            vector<basic_feature*> feature_list;
+            vector<feature*> feature_list;
             string param_name;
+            string param_type;
             string param_value;
             for (int i = 3; i < line_vect.size(); ++i) {
+                // Format: e.g. asd=int&12
                 param_name = line_vect[i].substr(0, line_vect[i].find("="));
-                param_value = line_vect[i].substr(line_vect[i].find("=") + 1);
-                feature_list.push_back(make_feature(param_name, param_value));
+                param_type = line_vect[i].substr(line_vect[i].find("=") + 1, line_vect[i].find("&") - line_vect[i].find("=") - 1);
+                param_value = line_vect[i].substr(line_vect[i].find("&") + 1);
+                feature_list.push_back(make_feature(param_name, param_type, param_value));
             }
             
             func_list[line_vect[1]] = make_custom_func(line_vect[1], feature_list);
@@ -309,16 +313,47 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
         out_file.write((char *)&name_len, sizeof(uint32_t));
         out_file.write(rtn_name.c_str(), sizeof(char) * name_len);
 
-        //TODO Feature names
-        uint32_t tot_fnames = 0;
+        // Feature names
+        unordered_map<string, uint64_t> fname_offsets;
+		unordered_map<string, uint64_t> ftype_offsets;
+		set<string> ftype_names;
+		uint32_t tot_fnames = 0;
+		std::fpos<mbstate_t> tot_fnames_position = out_file.tellp();
 		out_file.write((char *)&tot_fnames, sizeof(uint32_t));
 
-        //TODO Type names
-        uint32_t tot_typenames = 0;
-		out_file.write((char *)&tot_typenames, sizeof(uint32_t));
+        for (struct feature* pf: f.second->feature_list) {
+            string fname = pf->name;
+            if (fname_offsets.find(fname) == fname_offsets.end()) {
+                fname_offsets.insert(make_pair(fname, out_file.tellp()));
+                ftype_names.insert(pf->type);
+                uint16_t fname_len = fname.size();
+                out_file.write((char *)&fname_len, sizeof(uint16_t));
+                out_file.write(fname.c_str(), sizeof(char) * fname_len);
+                tot_fnames++;
+            }
+        }
+
+        // (No system variables)
+
+        // Type names
+        uint32_t tcount = ftype_names.size();
+		out_file.write((char *)&tcount, sizeof(uint32_t));
+		for (string t: ftype_names) {
+			ftype_offsets.insert(make_pair(t, out_file.tellp()));
+			uint16_t ftype_len = t.size();
+			out_file.write((char *)&ftype_len, sizeof(uint16_t));
+			out_file.write(t.c_str(), sizeof(char) * ftype_len);
+		}
+
+        // Go back and write the correct number of features
+        std::fpos<mbstate_t> prev_pos = out_file.tellp();
+		out_file.seekp(tot_fnames_position);
+		out_file.write((char *)&tot_fnames, sizeof(uint32_t));
+		out_file.seekp(prev_pos);
 
         // Number of samples (always 1 for us)
         uint32_t samples_count = 1;
+        std::fpos<mbstate_t> num_of_samples_position = out_file.tellp();
 		out_file.write((char *)&samples_count, sizeof(uint32_t));
 
         // Uid and metrics
@@ -335,13 +370,34 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
         out_file.write((char *)&tot_min_faults, sizeof(uint64_t));
         out_file.write((char *)&tot_maj_faults, sizeof(uint64_t));
 
-        //TODO Num of features
-        uint32_t tot_feats = 0;
-		out_file.write((char *)&tot_feats, sizeof(uint32_t));
+        // Num of features
+        uint32_t pn = 0, tot_features = 0;
+        std::fpos<mbstate_t> tf_pos = out_file.tellp();
+        out_file.write((char *)&tot_features, sizeof(uint32_t));
+        uint32_t rot_idx = 0;
+        string runtime_type;
+
+        // Local and global features
+        for (auto feat : f.second->feature_list) {
+            //TODO not sure about this one
+            runtime_type = "0";
+
+            // ...skipping some checks...
+
+            uint64_t offs = fname_offsets[feat->name];
+            uint64_t toffs = ftype_offsets[feat->type];
+            out_file.write((char *)&offs, sizeof(uint64_t));
+            out_file.write((char *)&toffs, sizeof(uint64_t));
+            out_file.write((char *)&(feat->value), sizeof(int64_t));
+        }
+
+        // ...skipping more checks...
 
         // System features (not used)
-        uint32_t tot_sysfeatures = 0;
-		out_file.write((char *)&tot_sysfeatures, sizeof(uint32_t));
+        prev_pos = out_file.tellp();
+        out_file.seekp(tf_pos);
+        out_file.write((char *)&tot_features, sizeof(uint32_t));
+        out_file.seekp(prev_pos);
 
         // Branches (not used)
         uint32_t num_of_branches = 0;
@@ -351,6 +407,10 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
         uint32_t num_of_children = 0;
         out_file.write((char *)&num_of_children, sizeof(uint32_t));
 
+        prev_pos = out_file.tellp();
+		out_file.seekp(num_of_samples_position);
+		out_file.write((char *)&samples_count, sizeof(uint32_t));
+		out_file.seekp(prev_pos);
         out_file.close();
     }
 }

@@ -45,9 +45,9 @@ struct custom_func {
     uint64_t maj_pagefault = 0;
     uint64_t server_min_pagefault = 0;
     uint64_t server_maj_pagefault = 0;
-    const std::vector<basic_feature*> feature_list;
+    const std::vector<feature*> feature_list;
 
-    custom_func(const std::string & n, const std::vector<basic_feature*> & f_l)
+    custom_func(const std::string & n, const std::vector<feature*> & f_l)
 	: name(n), feature_list(f_l) {};
 
     virtual std::string print() const {
@@ -80,7 +80,7 @@ struct custom_func {
 };
 
 
-custom_func * make_custom_func(const std::string & n, const std::vector<basic_feature*> & f_l) {
+custom_func * make_custom_func(const std::string & n, const std::vector<feature*> & f_l) {
     std::string uid = std::regex_replace(
         n,
         std::regex("[^0-9]*([0-9]+).*"),

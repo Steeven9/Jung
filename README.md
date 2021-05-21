@@ -9,7 +9,7 @@ Bachelor Project at USI, Lugano.
 A tool for Instrumentation and Performance Analysis of Distributed Systems based on [Freud](https://github.com/usi-systems/freud) and [gRPC](https://grpc.io).
 
 
-## Install gRPC and protobuf
+## Install dependencies
 
 ### Linux
 `apt install build-essential pkg-config protobuf-compiler-grpc libgrpc-dev libgrpc++-dev`
@@ -20,7 +20,7 @@ A tool for Instrumentation and Performance Analysis of Distributed Systems based
 `export PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/grpc/lib/pkgconfig:$PKG_CONFIG_PATH`
 
 ### Windows
-Get a Linux VM
+Get a Linux VM then see above.
 
 
 ## Compile and run the example
@@ -45,6 +45,11 @@ _Disclaimer_: the memory usage counter is not keeping track of the variations du
 While the library provides a warning for potential memory leaks, this might be inaccurate due to the complexity of memory managment in C.
 If you get any warnings, consider running your application through a dedicated tool like [Valgrind](https://valgrind.org/).
 If you don't get any, consider doing it anyway, don't trust me.
+
+
+## Testing
+
+As someone once said, *"Tests don't prove correctness"*, therefore this project has no coverage whatsoever.
 
 
 ## Docker

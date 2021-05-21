@@ -37,29 +37,25 @@
 
 enum Side { client, server };
 
-class basic_feature {
-public:
-    virtual std::string print() const = 0;
-};
+struct feature {    
+	std::string name;
+	std::string type;
+    std::string value;
 
-template <class T>
-struct feature : public basic_feature {
-    std::string name;
-    T value;
+    feature(const std::string & n, const std::string & t, const std::string & v)
+	: name(n), type(t), value(v) {};
 
-    feature(const std::string & n, const T & v)
-	: name(n), value(v) {};
-
+	// Format: e.g. asd=int&12
     virtual std::string print() const {
 		std::ostringstream output;
-    	output << name << "=" << value;
+    	output << name << "=" << type << "&" << value;
 		return output.str();
     }
 };
 
-template <class T>
-feature<T> * make_feature(const std::string & n, const T & v) {
-    return new feature<T>(n, v);
+//TODO find out if the inline is actually correct
+inline feature * make_feature(const std::string & n, const std::string & t, const std::string & v) {
+    return new feature(n, t, v);
 }
 
 struct custom_mutex {
@@ -142,7 +138,7 @@ extern int custom_pthread_cond_timedwait(std::string func_name, pthread_cond_t* 
 	Side is either server or client.
 */
 extern void start_instrum(std::string func_name, Side side, 
- const std::vector<basic_feature*> & feature_list);
+ const std::vector<feature*> & feature_list);
 
 /*
 	Stops the instrumentation.

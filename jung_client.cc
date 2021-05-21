@@ -27,7 +27,6 @@
 
 #include "jung.grpc.pb.h"
 #include "custom_instr.h"
-#include "trace_merge.h"
 
 #define SERVER_PORT 50051
 #define NUM_MSG 10
@@ -109,8 +108,8 @@ class JungClient {
 void do_stuff(unsigned int param) {
 	string func_name(__func__);
 	func_name += to_string(getNextUid());
-	start_instrum(func_name, client, { make_feature("param", param), 
-										make_feature("useless", 12.2) });
+	start_instrum(func_name, client, { make_feature("param", "int", to_string(param)), 
+										make_feature("useless", "double", to_string(12.2)) });
 
 	JungClient jung(grpc::CreateChannel(
 		server_address, grpc::InsecureChannelCredentials()));
@@ -154,8 +153,8 @@ void do_stuff(unsigned int param) {
 void do_multi_stuff(unsigned int param, struct custom_mutex * mutex) {
 	string func_name(__func__);
 	func_name += to_string(getNextUid());
-	start_instrum(func_name, client, { make_feature("param", param), 
-										make_feature("useless", 42069) });
+	start_instrum(func_name, client, { make_feature("param", "int", to_string(param)), 
+										make_feature("useless", "int", to_string(42069)) });
 
 	cout << "T" << this_thread::get_id() << " waiting for lock..." << endl;
 	// Acquire lock and hold for param sec

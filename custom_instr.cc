@@ -155,7 +155,7 @@ int custom_pthread_cond_timedwait(string func_name, pthread_cond_t* cond,
 }
 
 void start_instrum(std::string func_name, Side side, 
- const std::vector<basic_feature*> & feature_list) {
+ const std::vector<feature*> & feature_list) {
 	start_times[func_name] = chrono::steady_clock::now();
 	side_p = side;
 
