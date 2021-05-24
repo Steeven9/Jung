@@ -46,6 +46,9 @@ jung_server: jung.pb.o jung.grpc.pb.o jung_server.o custom_instr.o
 %.pb.cc: %.proto
 	$(PROTOC) -I . --cpp_out=. $<
 
+test: 
+	./run_tests.sh
+
 clean:
 	rm -f *.o *.pb.cc *.pb.h jung_client jung_server trace_merge *_log.txt
 	rm -rf symbols

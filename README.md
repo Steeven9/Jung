@@ -50,7 +50,8 @@ If you don't get any, consider doing it anyway, don't trust me.
 
 ## Testing
 
-As someone once said, *"Tests don't prove correctness"*, therefore this project has no coverage whatsoever.
+As someone once said, *"Tests don't prove correctness"*, therefore this project has no coverage whatsoever. You can however still run some
+basic tests with `make test`.
 
 
 ## Docker
