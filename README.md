@@ -1,5 +1,6 @@
 # Jung
 ![](https://img.shields.io/github/license/steeven9/jung)
+[![C/C++ CI](https://github.com/Steeven9/Jung/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/Steeven9/Jung/actions/workflows/c-cpp.yml)
 ![](https://img.shields.io/docker/cloud/automated/steeven9/jung)
 ![](https://img.shields.io/docker/cloud/build/steeven9/jung)
 ![](https://img.shields.io/tokei/lines/github/steeven9/jung)

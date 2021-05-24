@@ -17,11 +17,12 @@ Done so far
 - add custom_lock/unlock and custom_wait (->freud-pin.cpp:611)
 - look into condition variables locking
 - add demo with multithreading to test locks stats
+- improve performace traces format to make it compatible with freud-statistics
 
 
 TODO for next step
 ---------------------
-- improve performace traces format to make it compatible with freud-statistics
+- test freud-statistics interaction
 
 
 TODO for long-term
@@ -39,4 +40,4 @@ On hold
 TODO in the next meeting
 ---------------------
 - check on new features
-- Freud demo?
+- draw report draft
