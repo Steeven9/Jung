@@ -191,6 +191,20 @@ void generate_perf_trace() {
         }
         line_vect.push_back(line);
 
+        // Extract sample uid and func name
+        // (e.g do_stuff1 is the first run of do_stuff).
+        // Regexes credit: some random stackoverflow post
+        uint32_t uid = stoi(regex_replace(
+            line_vect[1],
+            std::regex("[^0-9]*([0-9]+).*"),
+            std::string("$1")
+        ));
+        string f_name = regex_replace(
+            line_vect[1],
+            std::regex("([^0-9]+).*"),
+            std::string("$1")
+        );
+
         if (line_vect[2] == "FUNC_START") {
             vector<feature*> feature_list;
             string param_name;
@@ -204,72 +218,77 @@ void generate_perf_trace() {
                 feature_list.push_back(make_feature(param_name, param_type, param_value));
             }
             
-            func_list[line_vect[1]] = make_custom_func(line_vect[1], feature_list);
-            func_list[line_vect[1]]->start_time = stol(line_vect[0]);
+            if (uid == 1) {
+                // First run of the function, create structs
+                func_list[f_name] = make_custom_func(f_name);
+            }
+            func_list[f_name]->sample_list[uid] = make_sample(uid);
+            func_list[f_name]->sample_list[uid]->feature_list = feature_list;
+            func_list[f_name]->sample_list[uid]->start_time = stol(line_vect[0]);
         }
 
         // Memory allocation
         if (line_vect[2] == "malloc") {
-            func_list[line_vect[1]]->memory_usage += stoi(line_vect[3]);
-            ++func_list[line_vect[1]]->mem_leaks;
+            func_list[f_name]->sample_list[uid]->memory_usage += stoi(line_vect[3]);
+            ++func_list[f_name]->sample_list[uid]->mem_leaks;
         }
 
         //Memory freeing
         if (line_vect[2] == "free") {
-            --func_list[line_vect[1]]->mem_leaks;
+            --func_list[f_name]->sample_list[uid]->mem_leaks;
         }
 
         // RPC start
         if (line_vect[2] == "RPC_start") {
-            func_list[line_vect[1]]->RPC_start_time = stol(line_vect[0]);
+            func_list[f_name]->sample_list[uid]->RPC_start_time = stol(line_vect[0]);
         }
 
         // RPC end
         if (line_vect[2] == "RPC_end") {
             uint64_t server_time = calc_server_time(line_vect[3]);
-            func_list[line_vect[1]]->server_time += server_time;
-            func_list[line_vect[1]]->network_time += stol(line_vect[0]) - 
-                func_list[line_vect[1]]->RPC_start_time - server_time;
+            func_list[f_name]->sample_list[uid]->server_time += server_time;
+            func_list[f_name]->sample_list[uid]->network_time += stol(line_vect[0]) - 
+                func_list[f_name]->sample_list[uid]->RPC_start_time - server_time;
 
             tuple<uint64_t, uint64_t> server_mem = calc_server_memory(line_vect[3]);
-            func_list[line_vect[1]]->server_memory_usage += get<0>(server_mem);
-            func_list[line_vect[1]]->server_mem_leaks += get<1>(server_mem);
+            func_list[f_name]->sample_list[uid]->server_memory_usage += get<0>(server_mem);
+            func_list[f_name]->sample_list[uid]->server_mem_leaks += get<1>(server_mem);
 
             tuple<uint64_t, uint64_t> server_pagefaults = calc_server_pagefaults(line_vect[3]);
-            func_list[line_vect[1]]->server_min_pagefault += get<0>(server_pagefaults);
-            func_list[line_vect[1]]->server_maj_pagefault += get<1>(server_pagefaults);
+            func_list[f_name]->sample_list[uid]->server_min_pagefault += get<0>(server_pagefaults);
+            func_list[f_name]->sample_list[uid]->server_maj_pagefault += get<1>(server_pagefaults);
         }
 
         // Pagefault (minor and major)
         if (line_vect[2] == "pagefault") {
-            func_list[line_vect[1]]->min_pagefault += stoi(line_vect[3]);
-            func_list[line_vect[1]]->maj_pagefault += stoi(line_vect[4]);
+            func_list[f_name]->sample_list[uid]->min_pagefault += stoi(line_vect[3]);
+            func_list[f_name]->sample_list[uid]->maj_pagefault += stoi(line_vect[4]);
         }
 
         // Waiting time (lock)
         if (line_vect[2] == "mutex_lock") {
-            func_list[line_vect[1]]->waiting_time += stoi(line_vect[3]);
+            func_list[f_name]->sample_list[uid]->waiting_time += stoi(line_vect[3]);
         }
 
         // Lock holding time
         if (line_vect[2] == "mutex_unlock") {
-            func_list[line_vect[1]]->lock_holding_time += stoi(line_vect[3]);
+            func_list[f_name]->sample_list[uid]->lock_holding_time += stoi(line_vect[3]);
         }
 
         // Waiting time (cond_wait)
         if (line_vect[2] == "cond_wait_returned") {
-            func_list[line_vect[1]]->waiting_time += stoi(line_vect[3]);
+            func_list[f_name]->sample_list[uid]->waiting_time += stoi(line_vect[3]);
         }
 
         // Waiting time (cond_timedwait)
         if (line_vect[2] == "cond_timedwait_returned") {
-            func_list[line_vect[1]]->waiting_time += stoi(line_vect[3]);
+            func_list[f_name]->sample_list[uid]->waiting_time += stoi(line_vect[3]);
         }
 
         // Function end - done
         if (line_vect[2] == "FUNC_END") {
-            func_list[line_vect[1]]->exec_time = stol(line_vect[0]) - 
-                func_list[line_vect[1]]->start_time;
+            func_list[f_name]->sample_list[uid]->exec_time = stol(line_vect[0]) - 
+                func_list[f_name]->sample_list[uid]->start_time;
         }
     }
 
@@ -281,8 +300,12 @@ void generate_perf_trace() {
     }
 
     for (const auto& f : func_list) {
-        cout << f.second->print() << "\n" << endl;
-        trace_log << f.second->print() << "\n" << endl;
+        cout << f.second->name << endl;
+        for (const auto& s : f.second->sample_list) {
+            cout << "Run #" << s.second->uid << endl;
+            cout << s.second->print() << "\n" << endl;
+            trace_log << s.second->print() << "\n" << endl;
+        }
     }
 
     encode_perf_trace(func_list);
@@ -321,15 +344,17 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
 		std::fpos<mbstate_t> tot_fnames_position = out_file.tellp();
 		out_file.write((char *)&tot_fnames, sizeof(uint32_t));
 
-        for (struct feature* pf: f.second->feature_list) {
-            string fname = pf->name;
-            if (fname_offsets.find(fname) == fname_offsets.end()) {
-                fname_offsets.insert(make_pair(fname, out_file.tellp()));
-                ftype_names.insert(pf->type);
-                uint16_t fname_len = fname.size();
-                out_file.write((char *)&fname_len, sizeof(uint16_t));
-                out_file.write(fname.c_str(), sizeof(char) * fname_len);
-                tot_fnames++;
+        for (const auto& s : f.second->sample_list) {
+            for (struct feature* pf: s.second->feature_list) {
+                string fname = pf->name;
+                if (fname_offsets.find(fname) == fname_offsets.end()) {
+                    fname_offsets.insert(make_pair(fname, out_file.tellp()));
+                    ftype_names.insert(pf->type);
+                    uint16_t fname_len = fname.size();
+                    out_file.write((char *)&fname_len, sizeof(uint16_t));
+                    out_file.write(fname.c_str(), sizeof(char) * fname_len);
+                    tot_fnames++;
+                }
             }
         }
 
@@ -357,55 +382,58 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
 		out_file.write((char *)&samples_count, sizeof(uint32_t));
 
         // Uid and metrics
-        uint64_t tot_mem = f.second->memory_usage + f.second->server_memory_usage;
-        uint64_t tot_lock_holding_time = f.second->server_lock_holding_time + f.second->lock_holding_time;
-        uint64_t tot_waiting_time = f.second->server_waiting_time + f.second->waiting_time;
-        uint64_t tot_min_faults = f.second->server_min_pagefault + f.second->min_pagefault;
-        uint64_t tot_maj_faults = f.second->server_maj_pagefault + f.second->maj_pagefault;
-        out_file.write((char *)&f.second->uid, sizeof(uint32_t));
-        out_file.write((char *)&f.second->exec_time, sizeof(uint64_t));
-        out_file.write((char *)&tot_mem, sizeof(uint64_t));
-        out_file.write((char *)&tot_lock_holding_time, sizeof(uint64_t));
-        out_file.write((char *)&tot_waiting_time, sizeof(uint64_t));
-        out_file.write((char *)&tot_min_faults, sizeof(uint64_t));
-        out_file.write((char *)&tot_maj_faults, sizeof(uint64_t));
+        for (const auto& s : f.second->sample_list) {
+            uint64_t tot_mem = s.second->memory_usage + s.second->server_memory_usage;
+            uint64_t tot_lock_holding_time = s.second->server_lock_holding_time + s.second->lock_holding_time;
+            uint64_t tot_waiting_time = s.second->server_waiting_time + s.second->waiting_time;
+            uint64_t tot_min_faults = s.second->server_min_pagefault + s.second->min_pagefault;
+            uint64_t tot_maj_faults = s.second->server_maj_pagefault + s.second->maj_pagefault;
+            out_file.write((char *)&s.second->uid, sizeof(uint32_t));
+            out_file.write((char *)&s.second->exec_time, sizeof(uint64_t));
+            out_file.write((char *)&tot_mem, sizeof(uint64_t));
+            out_file.write((char *)&tot_lock_holding_time, sizeof(uint64_t));
+            out_file.write((char *)&tot_waiting_time, sizeof(uint64_t));
+            out_file.write((char *)&tot_min_faults, sizeof(uint64_t));
+            out_file.write((char *)&tot_maj_faults, sizeof(uint64_t));
+            
 
-        // Num of features
-        uint32_t pn = 0, tot_features = 0;
-        std::fpos<mbstate_t> tf_pos = out_file.tellp();
-        out_file.write((char *)&tot_features, sizeof(uint32_t));
-        uint32_t rot_idx = 0;
-        string runtime_type;
+            // Num of features
+            uint32_t pn = 0, tot_features = 0;
+            std::fpos<mbstate_t> tf_pos = out_file.tellp();
+            out_file.write((char *)&tot_features, sizeof(uint32_t));
+            uint32_t rot_idx = 0;
+            string runtime_type;
 
-        // Local and global features
-        for (auto feat : f.second->feature_list) {
-            //TODO not sure about this one
-            runtime_type = "0";
+            // Local and global features
+            for (auto feat : s.second->feature_list) {
+                //TODO not sure about this one
+                runtime_type = "0";
 
-            // ...skipping some checks...
+                // ...skipping some checks...
 
-            uint64_t offs = fname_offsets[feat->name];
-            uint64_t toffs = ftype_offsets[feat->type];
-            out_file.write((char *)&offs, sizeof(uint64_t));
-            out_file.write((char *)&toffs, sizeof(uint64_t));
-            out_file.write((char *)&(feat->value), sizeof(int64_t));
+                uint64_t offs = fname_offsets[feat->name];
+                uint64_t toffs = ftype_offsets[feat->type];
+                out_file.write((char *)&offs, sizeof(uint64_t));
+                out_file.write((char *)&toffs, sizeof(uint64_t));
+                out_file.write((char *)&(feat->value), sizeof(int64_t));
+            }
+
+            // ...skipping more checks...
+
+            // System features (not used)
+            prev_pos = out_file.tellp();
+            out_file.seekp(tf_pos);
+            out_file.write((char *)&tot_features, sizeof(uint32_t));
+            out_file.seekp(prev_pos);
+
+            // Branches (not used)
+            uint32_t num_of_branches = 0;
+            out_file.write((char *)&num_of_branches, sizeof(uint32_t));
+
+            // Children (not used)
+            uint32_t num_of_children = 0;
+            out_file.write((char *)&num_of_children, sizeof(uint32_t));
         }
-
-        // ...skipping more checks...
-
-        // System features (not used)
-        prev_pos = out_file.tellp();
-        out_file.seekp(tf_pos);
-        out_file.write((char *)&tot_features, sizeof(uint32_t));
-        out_file.seekp(prev_pos);
-
-        // Branches (not used)
-        uint32_t num_of_branches = 0;
-        out_file.write((char *)&num_of_branches, sizeof(uint32_t));
-
-        // Children (not used)
-        uint32_t num_of_children = 0;
-        out_file.write((char *)&num_of_children, sizeof(uint32_t));
 
         prev_pos = out_file.tellp();
 		out_file.seekp(num_of_samples_position);

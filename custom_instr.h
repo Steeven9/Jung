@@ -53,7 +53,6 @@ struct feature {
     }
 };
 
-//TODO find out if the inline is actually correct
 inline feature * make_feature(const std::string & n, const std::string & t, const std::string & v) {
     return new feature(n, t, v);
 }
@@ -64,7 +63,6 @@ struct custom_mutex {
 };
 
 extern std::ofstream log_p;
-extern uint32_t uid;
 
 /*
 	Initializes our custom mutex struct.
@@ -74,7 +72,7 @@ extern int custom_mutex_init(custom_mutex *, const pthread_mutexattr_t *);
 /*
 	Thread-safely returns a new unique id (uid) for a function.
 */
-extern uint32_t getNextUid();
+extern uint32_t getNextUid(std::string func_name);
 
 /*
 	Writes the given string to the log file.

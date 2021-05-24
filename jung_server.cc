@@ -52,7 +52,7 @@ class JungServiceImpl final : public Jung::Service {
 	Status Greet(ServerContext* context, const JungRequest* request,
 					JungReply* reply) override {
 		string func_name =  __func__;
-		func_name += " " + to_string(++reply_id);
+		func_name += to_string(getNextUid(func_name)) + " " + to_string(++reply_id);
 		start_instrum(func_name, server, { make_feature("msg_len", "int", to_string(request->message().length())) });
 
 		//Allocate a byte of memory but free it immediately
@@ -73,7 +73,7 @@ class JungServiceImpl final : public Jung::Service {
 	Status ReturnDouble(ServerContext* context, const JungRequest* request,
 							JungReply* reply) override {
 		string func_name =  __func__;
-		func_name += " " + to_string(++reply_id);
+		func_name += to_string(getNextUid(func_name)) + " " + to_string(++reply_id);
 		start_instrum(func_name, server, { make_feature("d", "double", request->message()) });
 
 		reply->set_message(to_string(stoi(request->message()) * 2));

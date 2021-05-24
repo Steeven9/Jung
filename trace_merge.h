@@ -22,11 +22,12 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <map>
+#include <unordered_map>
 
 #include "custom_instr.h"
 
-struct custom_func {
-    std::string name;
+struct sample {
     uint32_t uid;
     uint64_t start_time = 0;
     uint64_t RPC_start_time = 0;
@@ -45,13 +46,12 @@ struct custom_func {
     uint64_t maj_pagefault = 0;
     uint64_t server_min_pagefault = 0;
     uint64_t server_maj_pagefault = 0;
-    const std::vector<feature*> feature_list;
+    std::vector<feature*> feature_list;
 
-    custom_func(const std::string & n, const std::vector<feature*> & f_l)
-	: name(n), feature_list(f_l) {};
+    sample(const uint32_t & u) : uid(u) {};
 
     virtual std::string print() const {
-        std::string msg = name + " took " + std::to_string(exec_time) + " " + TIMER_UNIT + ", of which approx. " + 
+        std::string msg = "Took " + std::to_string(exec_time) + " " + TIMER_UNIT + ", of which approx. " + 
             std::to_string(network_time) + " " + TIMER_UNIT + " in network and approx. " + std::to_string(server_time) + 
             " " + TIMER_UNIT + " in server.\nUsed " + std::to_string(memory_usage) + " bytes of memory client-side and " + 
             std::to_string(server_memory_usage) + " bytes of memory server-side.\nThere were " + std::to_string(min_pagefault) + 
@@ -79,16 +79,21 @@ struct custom_func {
     }
 };
 
+sample * make_sample(const uint32_t & u) {
+    return new sample(u);
+}
 
-custom_func * make_custom_func(const std::string & n, const std::vector<feature*> & f_l) {
-    std::string uid = std::regex_replace(
-        n,
-        std::regex("[^0-9]*([0-9]+).*"),
-        std::string("$1")
-    );
-    custom_func * f = new custom_func(n, f_l);
-    f->uid = stoi(uid);
-    return f;
+struct custom_func {
+    std::string name;
+    std::map<uint32_t, sample*> sample_list;
+
+    custom_func(const std::string & n)
+	: name(n) {};
+};
+
+
+custom_func * make_custom_func(const std::string & n) {
+    return new custom_func(n);
 }
 
 /* 

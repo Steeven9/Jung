@@ -30,8 +30,7 @@
 
 #define SERVER_PORT 50051
 #define NUM_MSG 10
-#define NUM_MSG_SHORT 2
-#define NUM_THREADS 2
+#define NUM_THREADS 4
 #define CLEAR_LOG true
 
 using grpc::Channel;
@@ -107,7 +106,7 @@ class JungClient {
 */
 void do_stuff(unsigned int param) {
 	string func_name(__func__);
-	func_name += to_string(getNextUid());
+	func_name += to_string(getNextUid(func_name));
 	start_instrum(func_name, client, { make_feature("param", "int", to_string(param)), 
 										make_feature("useless", "double", to_string(12.2)) });
 
@@ -152,7 +151,7 @@ void do_stuff(unsigned int param) {
 */
 void do_multi_stuff(unsigned int param, struct custom_mutex * mutex) {
 	string func_name(__func__);
-	func_name += to_string(getNextUid());
+	func_name += to_string(getNextUid(func_name));
 	start_instrum(func_name, client, { make_feature("param", "int", to_string(param)), 
 										make_feature("useless", "int", to_string(42069)) });
 
@@ -206,11 +205,10 @@ int main(int argc, char** argv) {
 
 	cout << "Connecting to " << server_address << "..." << endl;
 
-	cout << "-> Starting RPC test #1..." << endl;
-	do_stuff(NUM_MSG);
-
-	cout << "-> Starting RPC test #2..." << endl;
-	do_stuff(NUM_MSG_SHORT);
+	cout << "-> Starting RPC test..." << endl;
+	for (int i = 0; i < NUM_MSG; ++i) {
+		do_stuff(i);
+	}
 
 	cout << "-> Starting multithreaded test..." << endl;
 	struct custom_mutex lock;
@@ -220,7 +218,7 @@ int main(int argc, char** argv) {
 
 	vector<thread> threads;
 	for (int i = 0; i < NUM_THREADS; ++i) {
-		threads.push_back(thread(do_multi_stuff, NUM_MSG_SHORT, &lock));
+		threads.push_back(thread(do_multi_stuff, NUM_THREADS, &lock));
 	}
 	
 	for (auto &th : threads) {
