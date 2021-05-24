@@ -13,6 +13,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: dependencies
-      run: apt install build-essential pkg-config protobuf-compiler-grpc libgrpc-dev libgrpc++-dev
+      run: sudo apt install build-essential pkg-config protobuf-compiler-grpc libgrpc-dev libgrpc++-dev
     - name: make
       run: make
