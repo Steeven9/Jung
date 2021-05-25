@@ -376,8 +376,8 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
 		out_file.write((char *)&tot_fnames, sizeof(uint32_t));
 		out_file.seekp(prev_pos);
 
-        // Number of samples (always 1 for us)
-        uint32_t samples_count = 1;
+        // Number of samples
+        uint32_t samples_count = f.second->sample_list.size();
         std::fpos<mbstate_t> num_of_samples_position = out_file.tellp();
 		out_file.write((char *)&samples_count, sizeof(uint32_t));
 
@@ -407,6 +407,7 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
             // Local and global features
             for (auto feat : s.second->feature_list) {
                 //TODO not sure about this one
+                // We should have only primitives
                 runtime_type = "0";
 
                 // ...skipping some checks...
@@ -416,9 +417,13 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
                 out_file.write((char *)&offs, sizeof(uint64_t));
                 out_file.write((char *)&toffs, sizeof(uint64_t));
                 out_file.write((char *)&(feat->value), sizeof(int64_t));
+                ++tot_features;
             }
 
-            // ...skipping more checks...
+            if (tot_features != s.second->feature_list.size()) {
+                cerr << "Error: features amount mismatch for " << rtn_name << endl;
+                exit(EXIT_FAILURE);
+            }
 
             // System features (not used)
             prev_pos = out_file.tellp();

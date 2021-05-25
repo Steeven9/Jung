@@ -154,14 +154,12 @@ void do_multi_stuff(unsigned int param, struct custom_mutex * mutex) {
 	func_name += to_string(getNextUid(func_name));
 	start_instrum(func_name, client, { make_feature("param", "int", to_string(param)), 
 										make_feature("useless", "int", to_string(42069)) });
-
-	cout << "T" << this_thread::get_id() << " waiting for lock..." << endl;
 	// Acquire lock and hold for param sec
 	custom_pthread_mutex_lock(func_name, mutex);
 	cout << "T" << this_thread::get_id() << " holding for " << param << " seconds..." << endl;
 	this_thread::sleep_for(chrono::seconds(param));
-	custom_pthread_mutex_unlock(func_name, mutex);
 	cout << "T" << this_thread::get_id() << " releasing lock..." << endl;
+	custom_pthread_mutex_unlock(func_name, mutex);
 
 	finish_instrum(func_name);
 }
