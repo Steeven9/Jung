@@ -299,10 +299,14 @@ void generate_perf_trace() {
         exit(EXIT_FAILURE);
     }
 
+    //TODO add fname and run # in file
+
     for (const auto& f : func_list) {
         cout << f.second->name << endl;
+        trace_log << f.second->name << endl;
         for (const auto& s : f.second->sample_list) {
             cout << "Run #" << s.second->uid << endl;
+            trace_log << "Run #" << s.second->uid << endl;
             cout << s.second->print() << "\n" << endl;
             trace_log << s.second->print() << "\n" << endl;
         }
