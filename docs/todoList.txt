@@ -23,21 +23,21 @@ Done so far
 TODO for next step
 ---------------------
 - test freud-statistics interaction
+- write the report
 
 
 TODO for long-term
 ---------------------
-- identify some third-party non-trivial distributed applications and analyze them
-- write the report
 - have a pizza
 
 
-On hold
+Dropped
 ---------------------
 - develop a reader tool to "decrypt" the traces (with flag for human-readable stamps) [non-essential]
+- identify some third-party non-trivial distributed applications and analyze them
 
 
 TODO in the next meeting
 ---------------------
-- check on new features
-- draw report draft
+- check on freud integration
+- check on report
