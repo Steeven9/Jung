@@ -196,13 +196,13 @@ void generate_perf_trace() {
         // Regexes credit: some random stackoverflow post
         uint32_t uid = stoi(regex_replace(
             line_vect[1],
-            std::regex("[^0-9]*([0-9]+).*"),
-            std::string("$1")
+            regex("[^0-9]*([0-9]+).*"),
+            string("$1")
         ));
         string f_name = regex_replace(
             line_vect[1],
-            std::regex("([^0-9]+).*"),
-            std::string("$1")
+            regex("([^0-9]+).*"),
+            string("$1")
         );
 
         if (line_vect[2] == "FUNC_START") {
@@ -345,11 +345,11 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
 		unordered_map<string, uint64_t> ftype_offsets;
 		set<string> ftype_names;
 		uint32_t tot_fnames = 0;
-		std::fpos<mbstate_t> tot_fnames_position = out_file.tellp();
+		fpos<mbstate_t> tot_fnames_position = out_file.tellp();
 		out_file.write((char *)&tot_fnames, sizeof(uint32_t));
 
         for (const auto& s : f.second->sample_list) {
-            for (struct feature* pf: s.second->feature_list) {
+            for (feature* pf: s.second->feature_list) {
                 string fname = pf->name;
                 if (fname_offsets.find(fname) == fname_offsets.end()) {
                     fname_offsets.insert(make_pair(fname, out_file.tellp()));
@@ -375,14 +375,14 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
 		}
 
         // Go back and write the correct number of features
-        std::fpos<mbstate_t> prev_pos = out_file.tellp();
+        fpos<mbstate_t> prev_pos = out_file.tellp();
 		out_file.seekp(tot_fnames_position);
 		out_file.write((char *)&tot_fnames, sizeof(uint32_t));
 		out_file.seekp(prev_pos);
 
         // Number of samples
         uint32_t samples_count = f.second->sample_list.size();
-        std::fpos<mbstate_t> num_of_samples_position = out_file.tellp();
+        fpos<mbstate_t> num_of_samples_position = out_file.tellp();
 		out_file.write((char *)&samples_count, sizeof(uint32_t));
 
         // Uid and metrics
@@ -403,14 +403,13 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
 
             // Num of features
             uint32_t pn = 0, tot_features = 0;
-            std::fpos<mbstate_t> tf_pos = out_file.tellp();
+            fpos<mbstate_t> tf_pos = out_file.tellp();
             out_file.write((char *)&tot_features, sizeof(uint32_t));
             uint32_t rot_idx = 0;
             string runtime_type;
 
             // Local and global features
             for (auto feat : s.second->feature_list) {
-                //TODO not sure about this one
                 // We should have only primitives
                 runtime_type = "0";
 
@@ -420,7 +419,20 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
                 uint64_t toffs = ftype_offsets[feat->type];
                 out_file.write((char *)&offs, sizeof(uint64_t));
                 out_file.write((char *)&toffs, sizeof(uint64_t));
-                out_file.write((char *)&(feat->value), sizeof(int64_t));
+                int64_t v;
+                if (feat->type == "double") {
+                    v = stod(feat->value);
+                } else if (feat->type == "int") {
+                    v = stoi(feat->value);
+                } else if (feat->type == "float") {
+                    v = stof(feat->value);
+                } else if (feat->type == "long") {
+                    v = stol(feat->value);
+                } else {
+                    cerr << "Error: unknown feature type (" << feat->type << ") for " << rtn_name << endl;
+                    exit(EXIT_FAILURE);
+                }
+                out_file.write((char *)&v, sizeof(int64_t));
                 ++tot_features;
             }
 
@@ -444,10 +456,10 @@ void encode_perf_trace(unordered_map<string, custom_func *> func_list) {
             out_file.write((char *)&num_of_children, sizeof(uint32_t));
         }
 
-        prev_pos = out_file.tellp();
-		out_file.seekp(num_of_samples_position);
-		out_file.write((char *)&samples_count, sizeof(uint32_t));
-		out_file.seekp(prev_pos);
+        // prev_pos = out_file.tellp();
+		// out_file.seekp(num_of_samples_position);
+		// out_file.write((char *)&samples_count, sizeof(uint32_t));
+		// out_file.seekp(prev_pos);
         out_file.close();
     }
 }
