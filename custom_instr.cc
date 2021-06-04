@@ -38,7 +38,7 @@ mutex log_guard, dump_guard, uid_guard;
 vector<string> log_buffer;
 Side side_p;
 
-int custom_mutex_init(struct custom_mutex * mutex, const pthread_mutexattr_t * attr) {
+int custom_mutex_init(custom_mutex * mutex, const pthread_mutexattr_t * attr) {
 	return pthread_mutex_init(mutex->mutex, attr);
 }
 
@@ -91,7 +91,7 @@ void custom_free(string func_name, void* ptr) {
 	free(ptr);
 }
 
-int custom_pthread_mutex_lock(string func_name, struct custom_mutex* mutex) {
+int custom_pthread_mutex_lock(string func_name, custom_mutex* mutex) {
 	auto wait_start_time = chrono::steady_clock::now();
 	int result = pthread_mutex_lock(mutex->mutex);
 	if (result == 0) {
@@ -103,7 +103,7 @@ int custom_pthread_mutex_lock(string func_name, struct custom_mutex* mutex) {
 	return result;
 }
 
-int custom_pthread_mutex_trylock(string func_name, struct custom_mutex* mutex) {
+int custom_pthread_mutex_trylock(string func_name, custom_mutex* mutex) {
 	int result = pthread_mutex_trylock(mutex->mutex);
 	if (result == 0) {
 		auto now = chrono::steady_clock::now();
@@ -113,7 +113,7 @@ int custom_pthread_mutex_trylock(string func_name, struct custom_mutex* mutex) {
 	return result;
 }
 
-int custom_pthread_mutex_unlock(string func_name, struct custom_mutex* mutex) {
+int custom_pthread_mutex_unlock(string func_name, custom_mutex* mutex) {
 	int result = pthread_mutex_unlock(mutex->mutex);
 	if (result == 0) {
 		auto now = chrono::steady_clock::now();
@@ -123,7 +123,7 @@ int custom_pthread_mutex_unlock(string func_name, struct custom_mutex* mutex) {
 	return result;
 }
 
-int custom_pthread_cond_wait(string func_name, pthread_cond_t* cond, struct custom_mutex* mutex) {
+int custom_pthread_cond_wait(string func_name, pthread_cond_t* cond, custom_mutex* mutex) {
 	// Unlocks mutex (->update holding time), waits on cond (-> add waiting time),
 	// then relocks mutex and returns
 	auto start = chrono::steady_clock::now();
@@ -139,7 +139,7 @@ int custom_pthread_cond_wait(string func_name, pthread_cond_t* cond, struct cust
 }
 
 int custom_pthread_cond_timedwait(string func_name, pthread_cond_t* cond, 
- struct custom_mutex* mutex, const struct timespec* abstime) {
+ custom_mutex* mutex, const timespec* abstime) {
 	// Unlocks mutex (->update holding time), waits on cond until abstime
 	// (-> add waiting time) then relocks mutex and returns
 	auto start = chrono::steady_clock::now();
@@ -154,8 +154,8 @@ int custom_pthread_cond_timedwait(string func_name, pthread_cond_t* cond,
 	return result;
 }
 
-void start_instrum(std::string func_name, Side side, 
- const std::vector<feature*> & feature_list) {
+void start_instrum(string func_name, Side side, 
+ const vector<feature*> & feature_list) {
 	start_times[func_name] = chrono::steady_clock::now();
 	side_p = side;
 
@@ -169,7 +169,7 @@ void start_instrum(std::string func_name, Side side,
 }
 
 void finish_instrum(string func_name) {	
-	struct rusage data;
+	rusage data;
 	// RUSAGE_THREAD is not defined on darwin, so we fallback on SELF for portability.
 	// Process stats like pagefaults will be off, but at least we get _something_
 	#ifdef RUSAGE_THREAD

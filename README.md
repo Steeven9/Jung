@@ -1,5 +1,5 @@
 # Jung
-![](https://img.shields.io/github/license/steeven9/jung)
+[![](https://img.shields.io/github/license/steeven9/jung)](/LICENSE)
 [![C/C++ CI](https://github.com/Steeven9/Jung/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/Steeven9/Jung/actions/workflows/c-cpp.yml)
 [![](https://img.shields.io/docker/cloud/automated/steeven9/jung)](https://hub.docker.com/repository/docker/steeven9/jung)
 [![](https://img.shields.io/docker/cloud/build/steeven9/jung)](https://hub.docker.com/repository/docker/steeven9/jung)
@@ -50,7 +50,7 @@ If you don't get any, consider doing it anyway, don't trust me.
 
 ## Testing
 
-As someone once said, *"Tests don't prove correctness"*, therefore this project has no coverage whatsoever. You can however still run some
+As someone once said, _"Tests don't prove correctness"_, therefore this project has no coverage whatsoever. You can however still run some
 basic tests with `make test`.
 
 

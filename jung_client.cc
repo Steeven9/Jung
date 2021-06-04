@@ -149,7 +149,7 @@ void do_stuff(unsigned int param) {
 	A multithreaded function to be analyzed. Takes an 
 	int parameter that should make the complexity scale.
 */
-void do_multi_stuff(unsigned int param, struct custom_mutex * mutex) {
+void do_multi_stuff(unsigned int param, custom_mutex * mutex) {
 	string func_name(__func__);
 	func_name += to_string(getNextUid(func_name));
 	start_instrum(func_name, client, { make_feature("param", "int", to_string(param)), 
@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
 	}
 
 	cout << "-> Starting multithreaded test..." << endl;
-	struct custom_mutex lock;
+	custom_mutex lock;
 	pthread_mutex_t m;
 	lock.mutex = &m;
 	custom_mutex_init(&lock, NULL);
