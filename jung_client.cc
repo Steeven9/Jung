@@ -29,7 +29,7 @@
 #include "custom_instr.h"
 
 #define SERVER_PORT 50051
-#define NUM_MSG 10
+#define NUM_MSG 20
 #define NUM_THREADS 4
 #define CLEAR_LOG true
 
