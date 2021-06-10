@@ -2,37 +2,153 @@
 
     Bla bla intro stuff
 
+    \section{Usage}
+
+        In this section you can find instruction on how to compile, run, and analyze the obtained data.\\
+
+        First clone the two repositories:\\
+        
+        \texttt{\$ git clone https://github.com/Steeven9/Jung}\\
+
+        \texttt{\$ git clone https://github.com/usi-systems/freud}\\
+
+        Then install the requirements as specified in both READMEs.\\
+
+        Let's start by compiling and running our example program:\\
+
+        \texttt{\$ cd Jung}\\
+
+        \texttt{\$ make}\\
+
+        \texttt{\$ ./jung\_server}\\
+        
+        In another shell: \texttt{\$ ./jung\_client}\\
+
+        Note: if you run the server on another machine, you can pass the \texttt{---target=HOSTNAME}
+        % three dashes renders correctly in the sentence above dunno why leave it like that
+        argument to the client.\\
+
+        Then, with both the client and server logfiles in the repo folder, merge the traces:\\
+
+        \texttt{\$ ./trace\_merge}\\
+
+        This will produce the binary data (under \texttt{symbols/}) and a summary of the execution.
+        We can then compile and run freud's analysis tool:\\
+
+        \texttt{\$ cd ../freud/freud-statistics}\\
+
+        \texttt{\$ make}\\
+
+        \texttt{\$ ./freud\_statistics 3 0 0 do\_stuff ../../Jung/symbols/do\_stuff/}
+        (example, refer to freud's documentation for details and usage)\\
+
+        This should fine a nice regression and plot it. That's it!
+
 
 \chapter{Performance analysis}
 
-    What is it, problem context, existing solutions in general
+    % What is it, problem context, existing solutions in general
+
+    As the name implies, performance analysis is a field that deals with finding out
+    how efficiently your code runs. It's a very vast realm and everyone is in some
+    way in need of it; after all, especially in large companies, efficiency is key. Imagine if
+    each Google query took one second less because someone found out that they could
+    optimize the database query, or if the loading time of a webpage got halved because the
+    webmaster found a function that was holding for no reason: both of those could be the result
+    of a performance analysis study.\\
+
+    As I mentioned, almost every kind of application can be measured, with a vast variety of what we call metrics:
+    execution time, memory or CPU cycles used, lock holding time, and many more. Those can be used in
+    various ways and will be chosen accordingly to the type of application. For example, a single-threaded app
+    will not be concerned about lock holding time, while a frontend web developer isn't 
+    necessarily interested in knowing about pagefaults.\\
+
+    There are a lot of existing tools and solutions out there (some of which discussed in section \ref{sec:freud})
+    that can instrument the executables: a dedicated tool injects some special code directly in the compiled
+    binary file, thanks to some particular compiler flags. This generated code then measures
+    the various parameters, keeping track of starting and ending times, memory allocations, and so on.
+    At the end, an information dump is produced to summarize the data, which can then be analyzed.
 
 
 \chapter{Project design}
 
-    \section{Freud}
+    \section{Freud}\label{sec:freud}
 
-        Brief description, intro to Freud and PIN, what they do and how
+        % Brief description, intro to Freud and PIN, what they do and how
+
+        My thesis follows the steps of Freud, a tool developed by Daniele Rogora, an USI PhD student.
+        This software has multiple components; the first two (\texttt{freud-dwarf} and \texttt{freud-pin})
+        are tasked with instrumenting the executable 
+        via a special tool called PIN \cite{pin}, developed by Intel. This library - as explained earlier - 
+        inserts the instructions necessary to collect the data during the execution. Basically, coding this
+        part means writing code that will write some code to put into other code.\\
+
+        The other part of Freud, which is the one I will be interacting with, is \texttt{freud-statistics}.
+        As the name implies, this module (based on the popular \texttt{R} library) computes some important
+        statistics such as regression or clustering given the output of the instrumentation.
+
 
     \section{Requirements and analysis}
 
-        Goals, what I needed to implement, refer to the plan and list of tasks, what's the idea
+        % Goals, what I needed to implement, refer to the plan and list of tasks, what's the idea
 
-        Develop a simple distributed application based on an RPC library to be used as an initial test environment
+        The main idea was to start small and build features incrementally, to ensure that we always
+        had a minimal working prototype. The main objective of Jung - a name chosen after Carl Jung \cite{jung},
+        a colleague of Sigmund Freud - is to instrument multiple systems, collect the data and format it.
+        To achieve this, I divided the project in three main components:
 
-        Develop an instrumentation for the client side, server side, and – crucially – the RPC library
+        \begin{itemize}
+            \item The actual instrumentation library, with an API to track the various metrics
+            \item The merger, which has to collect all the logfiles from the different systems
+             and merge them in a single coherent trace
+            \item The dumper, which is tasked with creating the binary output that will be fed
+             to \texttt{freud-statistics}
+        \end{itemize}
 
-        Devise a method to save and retrieve measurement logs from all the remote components
+        The main objectives of the developments were the following: first I had to develop a
+        simple distributed application, based on an RPC library, to be used as an initial test environment.
 
-        Design an algorithm to merge the logs from all the systems into a single coherent trace
+        Develop an instrumentation for the client side, server side, and – crucially – the RPC library:
+        the idea was to measure some meaningful statistics on all sides involved. The metrics we settled with are:
 
-        Integrate said trace in the existing statistics tool (freud-statistics) to derive the performance annotations
+        \begin{itemize}
+            \item Execution time, divided in total, server, and network time
+            \item Memory usage
+            \item Major and minor pagefaults
+            \item Lock holding and waiting time
+            \item Possible memory leaks (experimental)
+        \end{itemize}
 
-        Identify some third-party non-trivial distributed applications and analyze them with the created tool
+        Except for the first one, all the other are divided in client and server side, to allow for an
+        accurate differentation; futhermore, except for memory leaks, all of them are supported by 
+        \texttt{freud-statistics}.\\
 
-        Write the report, prepare the poster and presentation
+        Then, i had to devise a method to save and retrieve the measurement logs from all the components.
+        This has been done by dumping the collected information in a text file with some special encoding
+        for data types and more complex values.\\
+
+        The next step was to design an algorithm to merge the logs from all the systems into a single
+        coherent trace. This was tricky because I had to correctly identify all the remote calls to allow
+        to trace back which server execution corresponded to which client function. We don't want to credit
+        someone with the costs of someone else...\\
+
+        Integrating said trace in the existing statistics tool (\texttt{freud-statistics}) to derive
+        the performance annotations was the last objective for the coding part. For this I had to rely on the
+        help of its creator, Daniele, to fully understand how to format the data. There were a few hiccups due to
+        some technical issues, but the process concluded perfectly.
+
+        Unfortunately, the only abandoned part of the project was to identify some third-party non-trivial
+        distributed applications and analyze them with the created tool. Due to the fact that Jung doesn't work 
+        on the binary executable, we need to have access to the source code of the application we want to 
+        analyze. This heavily reduces the spectrum of possible target, and coupled with the little time left we
+        decided to abandon it.\\
+
+        Last but not least, I had to write the report, prepare the poster and the presentation. Due to the current
+        situation, we as a class decided to not hold the presentations this year, therefore this point got reduced
+        to the document you're reading.\\
         
-        Have a pizza
+        Have a pizza: this is still on hold but will definitely be completed sooner or later. Every project needs
+        a celebratory pizza at the end.
         
 
 \chapter{Implementation}
