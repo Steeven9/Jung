@@ -22,9 +22,11 @@ fi
 
 echo '== Compiling =='
 cd freud/freud-statistics
+git pull
 make
 
 cd ../../Jung
+git pull
 make
 
 echo '== Done! =='

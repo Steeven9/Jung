@@ -22,7 +22,6 @@ Done so far
 
 TODO for next step
 ---------------------
-- test freud-statistics interaction
 - write the report
 
 
@@ -39,5 +38,4 @@ Dropped
 
 TODO in the next meeting
 ---------------------
-- check on freud integration
 - check on report

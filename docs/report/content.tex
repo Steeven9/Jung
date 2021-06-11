@@ -1,6 +1,11 @@
 \chapter{Introduction}
 
-    Bla bla intro stuff
+    Freud \cite{freud} is a software performance analysis tool that derives performance annotations
+    from measurements of running systems. The goal of this project is to extend Freud to 
+    instrument and collect data from a distributed software system. This means augmenting 
+    the existing implementation to be able to link the data collected over distributed components 
+    using causal relations.
+
 
     \section{Usage}
 
@@ -33,14 +38,14 @@
         \texttt{\$ ./trace\_merge}\\
 
         This will produce the binary data (under \texttt{symbols/}) and a summary of the execution.
-        We can then compile and run freud's analysis tool:\\
+        We can then compile and run Freud's analysis tool:\\
 
         \texttt{\$ cd ../freud/freud-statistics}\\
 
         \texttt{\$ make}\\
 
         \texttt{\$ ./freud\_statistics 3 0 0 do\_stuff ../../Jung/symbols/do\_stuff/}
-        (example, refer to freud's documentation for details and usage)\\
+        (example, refer to Freud's documentation for details and usage)\\
 
         This should fine a nice regression and plot it. That's it!
 
@@ -155,10 +160,18 @@
     
     \section{Technologies and tools used}
 
-        Used gRPC \cite{gRPCdocs} as the RPC library, 
-        freud-statistics \cite{freud} to analyze the output,
-        
-        bumped compiler to C++17 for \texttt{filesystem::exists()}
+        I used gRPC \cite{gRPCdocs} as the RPC library, since it seemed pretty straightforward and simple
+        to use. They have plenty of examples in their documentation and support a lot of languages, including C++.\\
+
+        The choice of language was pretty easy as well: Freud is built entirely in C/C++, so using the same
+        language would increase compatibility. The only choice I had to make was regarding the version:
+        I went with C++17 to benefit from the \texttt{filesystem::exists()} function, used to check
+        for the existance of previous logfiles.\\
+
+        To simplify development and testing, I also packaged an auto-building Docker image 
+        (\url{https://hub.docker.com/repository/docker/steeven9/jung}) with the example server in it.
+        This way I could keep the server running on another machine and, for example, test the network times.
+
 
     \section{Issues}
 
@@ -192,12 +205,15 @@
 
     Thanks to my advisor, Daniele and everyone that supported me
 
+
 	\section{Future work and possible developments}
 
-        Re: what the next guy will have to work on next year
+        While this project can be considered a success, there are still a number of improvements
+        that could be done. For example a better handling of the data dumping via a separate thread,
+        since now every function writes the buffered metrics when it finished executing. While this
+        is barely noticeable on a small scale, it could add a significative overhead under large loads.\\
 
-        Better handling of the data dumping/efficiency (separate thread)
+        A crucial missing part is an actual instrumentation like Freud's, either with PIN or another
+        library, to allow for direct instrumentation of executables instead of changing the source code.
 
-        Integration with PIN (very hard)
-
-        Support more complex features (re: freud's CLASS type or something)
+        Another possible improvement would be to support more complex features, like structs.
