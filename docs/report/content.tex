@@ -1,53 +1,6 @@
 \chapter{Introduction}
 
-    Freud \cite{freud} is a software performance analysis tool that derives performance annotations
-    from measurements of running systems. The goal of this project is to extend Freud to 
-    instrument and collect data from a distributed software system. This means augmenting 
-    the existing implementation to be able to link the data collected over distributed components 
-    using causal relations.
-
-
-    \section{Usage}
-
-        In this section you can find instruction on how to compile, run, and analyze the obtained data.\\
-
-        First clone the two repositories:\\
-        
-        \texttt{\$ git clone https://github.com/Steeven9/Jung}\\
-
-        \texttt{\$ git clone https://github.com/usi-systems/freud}\\
-
-        Then install the requirements as specified in both READMEs.\\
-
-        Let's start by compiling and running our example program:\\
-
-        \texttt{\$ cd Jung}\\
-
-        \texttt{\$ make}\\
-
-        \texttt{\$ ./jung\_server}\\
-        
-        In another shell: \texttt{\$ ./jung\_client}\\
-
-        Note: if you run the server on another machine, you can pass the \texttt{---target=HOSTNAME}
-        % three dashes renders correctly in the sentence above dunno why leave it like that
-        argument to the client.\\
-
-        Then, with both the client and server logfiles in the repo folder, merge the traces:\\
-
-        \texttt{\$ ./trace\_merge}\\
-
-        This will produce the binary data (under \texttt{symbols/}) and a summary of the execution.
-        We can then compile and run Freud's analysis tool:\\
-
-        \texttt{\$ cd ../freud/freud-statistics}\\
-
-        \texttt{\$ make}\\
-
-        \texttt{\$ ./freud\_statistics 3 0 0 do\_stuff ../../Jung/symbols/do\_stuff/}
-        (example, refer to Freud's documentation for details and usage)\\
-
-        This should fine a nice regression and plot it. That's it!
+    TODO
 
 
 \chapter{Performance analysis}
@@ -89,8 +42,8 @@
         part means writing code that will write some code to put into other code.\\
 
         The other part of Freud, which is the one I will be interacting with, is \texttt{freud-statistics}.
-        As the name implies, this module (based on the popular \texttt{R} library) computes some important
-        statistics such as regression or clustering given the output of the instrumentation.
+        As the name implies, this module (based on the popular \texttt{R} library\footnote{\url{https://www.r-project.org/}})
+        computes some statistics such as regression or clustering given the output of the instrumentation.
 
 
     \section{Requirements and analysis}
@@ -98,7 +51,8 @@
         % Goals, what I needed to implement, refer to the plan and list of tasks, what's the idea
 
         The main idea was to start small and build features incrementally, to ensure that we always
-        had a minimal working prototype. The main objective of Jung - a name chosen after Carl Jung \cite{jung},
+        had a minimal working prototype. The main objective of Jung - a name chosen after Carl
+        Jung\footnote{\url{https://en.wikipedia.org/wiki/Carl_Jung}},
         a colleague of Sigmund Freud - is to instrument multiple systems, collect the data and format it.
         To achieve this, I divided the project in three main components:
 
@@ -157,7 +111,15 @@
         
 
 \chapter{Implementation}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{schema.png}
+        \caption{Jung's general functionment}
+        \label{fig:schema}
+    \end{figure}
     
+
     \section{Technologies and tools used}
 
         I used gRPC \cite{gRPCdocs} as the RPC library, since it seemed pretty straightforward and simple
@@ -175,14 +137,26 @@
 
     \section{Issues}
 
-        Made some choices to simplify structure initially, but then had to change it and
-        refactor everything
+        The only major problem I had - which I believe to be very common - was that I made some
+        design choices in order to simplify my job initially, but then with the addition of
+        new features or to fix certain problems I had to change approach. The direct consequence was that I
+        had to rewrite some large parts of the code and data structures to adapt to the new needs.\\
+        
+        One instance of the aforementioned problem is that I had to develop some particular encodings
+        to represent the parameters, since I had to convert from data (the running code) to text
+        (the logifle) and viceversa. More specifically, I chose to represent the values as 
+        \texttt{name\=type\&value} (e.g. \texttt{asd\=int\&12} for an integer named \texttt{asd} of value 12);
+        this added a supplementary layer of encoding/decoding when saving and reading the data to/from the
+        logfile.\\        
 
-        Problems making sense of the numbers returned by \texttt{freud-statistics} and unable
-        to see what was in the binary file to check if I was dumping correctly
+        When we first started testing the integration with \texttt{freud-statistics}, since I was unable
+        to see what was in the binary file, I had troubles checking if I was dumping the metrics correctly,
+        resulting in some weird-looking statistics. With the help of Daniele, we managed to make sense of
+        the output and find the offending code part to patch.\\
 
-        Had to develop some particular encodings since passing from data to text and from text
-        to data
+        And of course, I had my fair share of miscellaneous issues with pointers, segmentation faults and 
+        general weird behaviours. As a positive note, in the process I somehow created a program that frees
+        memory as you run it...
 
         \begin{figure}[H]
             \centering
@@ -191,19 +165,93 @@
             \label{fig:memUsage}
         \end{figure}
 
+        Another problem we ran into was that we were unable to get \texttt{freud-statistics} to find a
+        regression despite our data was clearly a good candidate for it. Turns out we simply didn't have a
+        good enough p-value, which was easily fixed by getting more samples, as shown below.
+
+        \begin{figure}[H]
+            \centering
+            \begin{subfigure}[b]{0.49\textwidth}
+                \includegraphics[width=\textwidth]{result.png}
+                \caption{Not enough data point}
+                \label{fig:result1}
+            \end{subfigure}
+            \hfill
+            \begin{subfigure}[b]{0.49\textwidth}
+                \includegraphics[width=\textwidth]{result_correct.png}
+                \caption{With enough data points}
+                \label{fig:result2}
+            \end{subfigure}
+            \caption{The result of our test program}
+            \label{fig:fullresult}
+        \end{figure}
+
 
 \chapter{Evaluation}
 
-    Code validation, analysis of results and practical applications, personal experience
+    % Code validation, analysis of results and practical applications, personal experience
 
-    No coverage/automated tests due to the complexity and erratic nature of the software
+    TODO funcionality, personal experience
+
+
+    \section{Testing}
+
+        Due to the complexity and particular nature of the software, we decided to not implement any automated
+        tests. Opposed to test-driven development, I had a more unstructured way of iterating over the code,
+        since the functionality had to be checked by hand comparing the produced logfiles with the program.
+        Therefore, the effective coverage is 0\%, but as someone one said:\\
+
+        \begin{quote} 
+            \centering 
+            \textit{"Tests don't prove correctness"}
+        \end{quote}
+
+
+    \section{Demo}
+
+        In this section you can find instruction on how to run a demo program and analyze the obtained data.\\
+
+        To install and compile all the required software, simply run the \texttt{install.sh} script from the Jung repository.
+        In case of failure, please refer to the READMEs of each project for more information.\\
+
+        First, start the server:\\
+
+        \texttt{\$ ./jung\_server}\\
+        
+        While in another shell, run the client:\\
+        
+        \texttt{\$ ./jung\_client}\\
+
+        \textit{Note: if you run the server on another machine, you can pass the \texttt{---target=HOSTNAME}
+        % three dashes in the sentence above render correctly dunno why leave it like that
+        argument to the client.}\\
+
+        Then, with both the client and server logfiles in the root folder, merge the traces:\\
+
+        \texttt{\$ ./trace\_merge}\\
+
+        This will produce the binary data (under \texttt{symbols/}) and a summary of the execution.
+        We can then run Freud's analysis tool:\\
+
+        \texttt{\$ cd ../freud/freud-statistics}\\
+
+        \texttt{\$ ./freud\_statistics 3 0 0 do\_stuff ../../Jung/symbols/do\_stuff/}\\
+        
+        \textit{Note: this is an example, refer to Freud's documentation for details and usage.}\\
+
+        This should fine a nice regression and plot it. That's it!
 
 
 \chapter{Conclusions}
 
-    Results wrt objectives, limitations
+    % Results wrt objectives, limitations
 
-    Thanks to my advisor, Daniele and everyone that supported me
+    TODO\\
+
+    I'd like to thank Antonio, my advisor, for the opportunity and for guiding me throughout
+    this project; Daniele, Freud's author, for his support and help
+    understanding his software; my friends Sasha and Brites for their direct contribution;
+    and last but not least everyone that supported me during these tiring times.
 
 
 	\section{Future work and possible developments}
@@ -214,6 +262,6 @@
         is barely noticeable on a small scale, it could add a significative overhead under large loads.\\
 
         A crucial missing part is an actual instrumentation like Freud's, either with PIN or another
-        library, to allow for direct instrumentation of executables instead of changing the source code.
+        library, to allow for direct instrumentation of executables instead of changing the source code.\\
 
-        Another possible improvement would be to support more complex features, like structs.
+        Another possible improvement would be to support more complex features as parameters, like structs.
