@@ -12,6 +12,9 @@ A tool for Instrumentation and Performance Analysis of Distributed Systems based
 
 ## Install dependencies
 
+An automated installation script for both Jung and Freud, `install.sh`, is included in the repo.
+Detailed instructions are provided below for manual setup.
+
 ### Linux
 `apt install build-essential pkg-config protobuf-compiler-grpc libgrpc-dev libgrpc++-dev`
 

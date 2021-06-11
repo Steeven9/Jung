@@ -1,13 +1,22 @@
 #!/usr/bin/env bash
-echo 'Jung & Freud install script v1.0'
+echo 'Jung & Freud install script v1.1'
 
 echo '== Cloning repositories =='
-git clone https://github.com/Steeven9/Jung
-git clone https://github.com/usi-systems/freud
+if [[ -d ".git" ]]; then
+    # In a repo, assume it's Jung
+    echo 'Repository detected, cloning Freud only'
+    cd ..
+    git clone https://github.com/usi-systems/freud
+else
+    # Not in a repo, clone both
+    git clone https://github.com/Steeven9/Jung
+    git clone https://github.com/usi-systems/freud
+fi
 
 echo '== Installing dependencies =='
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Linux
+    sudo apt update
     sudo apt install -y build-essential pkg-config protobuf-compiler-grpc libgrpc-dev libgrpc++-dev r-base r-base-dev gnuplot
     export R_HOME=/usr/local/lib/R
 elif [[ "$OSTYPE" == "darwin"* ]]; then
@@ -27,7 +36,7 @@ make
 
 cd ../../Jung
 git pull
-make
+make clean all
 
 echo '== Done! =='
 echo 'Some environment variables have been automatically set in this shell.'
