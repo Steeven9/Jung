@@ -37,7 +37,7 @@ Then, in another terminal, run the client
 
 `./jung_client`
 
-This will produce two files, `client_log.txt` and `server_log.txt`, that can be merged in a unique trace by running `./trace_merge`. If your server is running on another machine, be sure to retrieve the logfile before merging!
+This will produce two files, `client_log.txt` and `server_log.txt`, that can be merged in a unique trace by running `./trace_merge`. If your server is running on another machine, be sure to retrieve the log file before merging!
 This will in turn produce a human-readable file (`trace_log.txt`) and a `symbols` folder that contains the unified costs
 encoded in binary format. These can then be read by `freud-statistics` (see the [original repo](https://github.com/usi-systems/freud) for instructions).
 

@@ -33,7 +33,7 @@ vector<tuple<int, int>> server_log_indices;
 vector<string> server_log_lines;
 
 /* 
-    Helper function to parse the server logfile
+    Helper function to parse the server log file
     and store indices of lines to simplify
     and speed up further access.
 */
@@ -180,7 +180,7 @@ void generate_perf_trace() {
     size_t pos;
     unordered_map<string, custom_func *> func_list;
 
-    // Get the client logfile line by line
+    // Get the client log file line by line
     while(getline(client_log, line)) {
         line_vect.clear();
 
@@ -295,7 +295,7 @@ void generate_perf_trace() {
     if (line_vect[2] == "FUNC_END") {
         cout << "Trace generation successful\n" << endl;
     } else {
-        cerr << "Error: incorrect logfile format (no end)" << endl;
+        cerr << "Error: incorrect log file format (no end)" << endl;
         exit(EXIT_FAILURE);
     }
 
