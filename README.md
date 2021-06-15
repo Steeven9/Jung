@@ -41,12 +41,12 @@ This will produce two files, `client_log.txt` and `server_log.txt`, that can be 
 This will in turn produce a human-readable file (`trace_log.txt`) and a `symbols` folder that contains the unified costs
 encoded in binary format. These can then be read by `freud-statistics` (see the [original repo](https://github.com/usi-systems/freud) for instructions).
 
-Alternatively, by running `./trace_merge --simple`, a simple merged log (`merged_log.txt`) can be optained instead.
+Alternatively, by running `./trace_merge --simple`, a simple merged log (`merged_log.txt`) can be obtained instead.
 
 _Note_: all the file names are customizable in `custom_instr.h`.
 
 _Disclaimer_: the memory usage counter is not keeping track of the variations due to `realloc` calls. 
-While the library provides a warning for potential memory leaks, this might be inaccurate due to the complexity of memory managment in C.
+While the library provides a warning for potential memory leaks, this might be inaccurate due to the complexity of memory management in C.
 If you get any warnings, consider running your application through a dedicated tool like [Valgrind](https://valgrind.org/).
 If you don't get any, consider doing it anyway, don't trust me.
 
