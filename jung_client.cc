@@ -29,7 +29,7 @@
 #include "custom_instr.h"
 
 #define SERVER_PORT 50051
-#define NUM_MSG 20
+#define NUM_MSG 30
 #define NUM_THREADS 4
 #define CLEAR_LOG true
 
@@ -101,7 +101,7 @@ class JungClient {
 };
 
 /*
-	A function to be analyzed. Takes an int parameter
+	The function to be analyzed. Takes an int parameter
 	that should make the complexity scale.
 */
 void do_stuff(unsigned int param) {
@@ -118,7 +118,7 @@ void do_stuff(unsigned int param) {
 
 	// Send the "ciao" messages
 	for (int i = 0; i < param; ++i) {
-		string message("mamma " + to_string(i));
+		string message("mamma " + to_string(param));
 		write_log(func_name, "RPC_start");
 		JungReply reply = jung.Greet(message);
 
@@ -131,7 +131,7 @@ void do_stuff(unsigned int param) {
 
 	// Send the Double messages
 	for (int i = 0; i < param; ++i) {
-		string message(to_string(i));
+		string message(to_string(param));
 		write_log(func_name, "RPC_start");
 		JungReply reply = jung.ReturnDouble(message);
 
@@ -205,6 +205,7 @@ int main(int argc, char** argv) {
 
 	cout << "-> Starting RPC test..." << endl;
 	for (int i = 0; i < NUM_MSG; ++i) {
+		cout << "--> Iteration " << i << "/" << NUM_MSG << endl;
 		do_stuff(i);
 	}
 

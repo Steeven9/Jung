@@ -22,6 +22,7 @@
 #include <thread>
 #include <filesystem>
 #include <stdio.h>
+#include <random>
 
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/health_check_service_interface.h>
@@ -86,8 +87,18 @@ class JungServiceImpl final : public Jung::Service {
 			cout << "Received " << func_name << ": " << request->message() << endl;
 		}
 
-		// simulate a computation by sleeping for the given seconds / 2
-		this_thread::sleep_for(chrono::seconds(stoi(request->message()) / 2));
+		// simulate a computation by sleeping for the given seconds / 2,
+		// with the addition of some randomness to spice it up
+		random_device rd;
+		mt19937 gen(rd());
+		int param = stoi(request->message());
+		if (param < 1) {
+			param = 1;
+		}
+		exponential_distribution<> d(1.0 / param);
+		int val = (int)d(gen);
+		cout << "param: " << param << " - d: " << val << endl;
+		this_thread::sleep_for(chrono::seconds(val));
 
 		finish_instrum(func_name);
 		return Status::OK;
