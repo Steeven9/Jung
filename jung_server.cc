@@ -84,7 +84,7 @@ class JungServiceImpl final : public Jung::Service {
 		custom_malloc(func_name, stoi(request->message()));
 
 		if (VERBOSE) {
-			cout << "Received " << func_name << ": " << request->message() << endl;
+			cout << "Received " << func_name << ": " << request->message();
 		}
 
 		// simulate a computation by sleeping for the given seconds / 2,
@@ -97,7 +97,9 @@ class JungServiceImpl final : public Jung::Service {
 		}
 		exponential_distribution<> d(1.0 / param);
 		int val = (int)d(gen);
-		cout << "param: " << param << " - d: " << val << endl;
+		if (VERBOSE) {
+			cout << " - d: " << val << endl;
+		}
 		this_thread::sleep_for(chrono::seconds(val));
 
 		finish_instrum(func_name);

@@ -40,7 +40,14 @@
     that can \textit{instrument} the executables: a dedicated tool injects some special code directly in the compiled
     binary file, following some particular compiler flags. This generated code then measures
     different parameters, keeping track for example of starting and ending times, memory allocations, and so on.
-    At the end, an information dump is produced to summarize the data, which can then be analyzed in various ways.
+    At the end, an information dump is produced to summarize the data, which can then be analyzed in various ways.\\
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.65\textwidth]{clientLog.png}
+        \caption{An example of performance trace (in this case, produced by Jung)}
+        \label{fig:clientLog}
+    \end{figure}
 
 
 \chapter{Project design}
@@ -190,26 +197,10 @@
             \label{fig:memUsage}
         \end{figure}
 
-        Another problem we ran into was that we were unable to get \texttt{freud-statistics} to find a
+        Another problem we ran into was that initially we were unable to get \texttt{freud-statistics} to find a
         regression, despite our data was clearly a good candidate for it. Turns out we simply didn't have a
-        good enough p-value, which was easily fixed by getting more samples, as shown below.
-
-        \begin{figure}[H]
-            \centering
-            \begin{subfigure}[b]{0.49\textwidth}
-                \includegraphics[width=\textwidth]{result.png}
-                \caption{Not enough data points}
-                \label{fig:result1}
-            \end{subfigure}
-            \hfill
-            \begin{subfigure}[b]{0.49\textwidth}
-                \includegraphics[width=\textwidth]{result_correct.png}
-                \caption{With enough data points}
-                \label{fig:result2}
-            \end{subfigure}
-            \caption{The results of our test program}
-            \label{fig:fullresult}
-        \end{figure}
+        good enough p-value, which was easily fixed by getting more samples (details will follow in the next
+        chapter).        
 
 
 \chapter{Evaluation}
@@ -217,9 +208,48 @@
     % Code validation, analysis of results and practical applications, personal experience (?)
 
     Referring to the task list in section \ref{sec:requirements}, I can assert that I successfully implemented
-    all the required features. The results the library provides are accurate (to a certain extent) and I think
-    that the code is pretty solid. Alas, time and coding constraints limited the amount of testing I could do,
-    meaning that the performance analysis has been tested only with the demo program I made.
+    all the required features. The results the library provides are accurate (to a certain extent) and repeatable.\\
+
+    To test Jung's functionality I created a demo program that simulates a real use-case of this library:
+    a client program (\texttt{jung\_client}) sends some requests to a server (you guessed it, 
+    \texttt{jung\_server}) which computes the results and sends them back. To make it more realistic,
+    the server takes roughly the time in seconds equal to the parameter received (with some added
+    randomness), since it simulates a computation. Being a single-threaded sever, this has been
+    achieved by making the server thread sleep for the given input. On the other hand, the client
+    uses a \texttt{for} loop to send the requests, so the parameter's value increases gradually;
+    the maximum number of iterations has been set to 30, but it can be changed in the code.\\
+
+    Alas, time and coding constraints limited the amount of testing I could do,
+    meaning that the performance analysis has been tested only with a few scenarios. One of those
+    is illustrated in the plot below:\\
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{analysis.png}
+        \caption{The first plot produced by \texttt{freud-statistics}}
+        \label{fig:analysis1}
+    \end{figure}
+
+    As we can see, our data fits nicely in a quadratic regression, which makes sense if we consider
+    that our program can be represented by the following algorithm:\\
+
+    \begin{algorithm}
+        \For{$i \gets 0$ \textbf{to} NUM\_MSG} {
+            \For{$j \gets 0$ \textbf{to} $i$} {
+                sleep($j$)\;
+            }
+        }
+    \end{algorithm}
+
+    Another scenario can be represented by making the RPC calls a constant amount of times instead
+    of depending on the parameter, which produces the linear result illustrated below:\\
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{analysis2.png}
+        \caption{The second plot produced by \texttt{freud-statistics}}
+        \label{fig:analysis2}
+    \end{figure}
 
 
     \section{Testing}
@@ -277,19 +307,22 @@
 
     I consider the results I obtained pretty satisfying: I managed to realize a working application
     that complies with the requirements and could be used in the field to measure actual systems
-    (with some limitations, of course). The whole project was a great learning experience, both
+    (with some limitations, of course). As the evaluation shows, Jung correctly tracks and aggregates
+    metrics, producing an output which can be interpreted by another tool. Different behaviors are
+    correctly picked up and produce different outputs when analyzed, as expected.\\
+    
+    From a more personal point of view, the whole project was a great learning experience, both
     in terms of development and project management; in addition to refreshing my C++ skills, I
-    experienced carrying out a large-ish project on my own, with deadlines and constraints.\\
-
+    experienced carrying out a large-ish project on my own, with deadlines and constraints.
     I would like to add that the way my advisor and I organized the work was very helpful: small
     steps and weekly meetings allowed to iterate quickly over the code and to keep 
     relatively on track with the schedule. As a matter of fact, the only discarded feature,
     testing on third-party applications, was not mandatory for the completion of the project.\\
 
     I'd like to thank Antonio, my advisor, for the opportunity and for guiding me throughout
-    this project; Daniele, Freud's author, for his support and help
-    understanding his software; my friends Sasha and Brites for their direct contribution;
-    and last but not least everyone that supported me during these tiring times.
+    this project; Daniele, Freud's author, for his help understanding his amazing software;
+    my friends Sasha and Brites for their incredible support;
+    and last but not least everyone that supported me during these tiring times. Thank you!
 
 
 	\section{Future work and possible developments}
@@ -300,8 +333,10 @@
         is barely noticeable on a small scale, it could add a significative overhead under large loads
         or in performance-critical systems.\\
 
-        A crucial missing part is an actual instrumentation like Freud's, either with PIN or another
-        library, allowing the user to work on the executables instead of changing the source code.\\
+        A crucial missing part is an actual instrumentation like Freud's, either through PIN or another
+        similar library, allowing the user to work on the executables instead of having to change the source code.\\
 
         Other possible improvements would be to support more complex features as parameters, like structs,
-        and to automatically infer the type of the parameter (opposed as having to manually specify it).
+        automatically infer the type of the parameter (opposed as having to manually specify it), and
+        export the data in a more universal format, like csv, to be able to use it in a wider variety of
+        analysis tools.
