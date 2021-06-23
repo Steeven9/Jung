@@ -144,7 +144,7 @@
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.6\textwidth]{schema.png}
-        \caption{Jung's general functioning}
+        \caption{Jung's general functioning scheme}
         \label{fig:schema}
     \end{figure}
     
@@ -214,42 +214,62 @@
     a client program (\texttt{jung\_client}) sends some requests to a server (you guessed it, 
     \texttt{jung\_server}) which computes the results and sends them back. To make it more realistic,
     the server takes roughly the time in seconds equal to the parameter received (with some added
-    randomness), since it simulates a computation. Being a single-threaded sever, this has been
+    random margin), since it simulates a computation. Being a single-threaded sever, this has been
     achieved by making the server thread sleep for the given input. On the other hand, the client
     uses a \texttt{for} loop to send the requests, so the parameter's value increases gradually;
-    the maximum number of iterations has been set to 30, but it can be changed in the code.\\
+    the maximum number of iterations has been set to 20 and the number of points to 5,
+    but those can easily be changed in the code (\texttt{NUM\_MSG} and \texttt{NUM\_POINTS} respectively).\\
 
     Alas, time and coding constraints limited the amount of testing I could do,
-    meaning that the performance analysis has been tested only with a few scenarios. One of those
+    meaning that the performance analysis has been tested only with a few scenarios. The first one
     is illustrated in the plot below:\\
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.6\textwidth]{analysis.png}
+        \includegraphics[width=0.7\textwidth]{analysis.png}
         \caption{The first plot produced by \texttt{freud-statistics}}
         \label{fig:analysis1}
     \end{figure}
 
-    As we can see, our data fits nicely in a quadratic regression, which makes sense if we consider
-    that our program can be represented by the following algorithm:\\
+    As we can see, our data fits nicely in a quadratic regression, as expected;
+    our client program can be represented with the following algorithm:\\
 
-    \begin{algorithm}
+    \begin{algorithm}[H]
         \For{$i \gets 0$ \textbf{to} NUM\_MSG} {
-            \For{$j \gets 0$ \textbf{to} $i$} {
-                sleep($j$)\;
+            \For{$j \gets 0$ \textbf{to} NUM\_POINTS} {
+                \For{$k \gets 0$ \textbf{to} $i$} {
+                    sleep($k + $ random\_margin())\;
+                }
             }
         }
+        \caption{Quadratic simulation algorithm}
     \end{algorithm}
 
-    Another scenario can be represented by making the RPC calls a constant amount of times instead
-    of depending on the parameter, which produces the linear result illustrated below:\\
+    \vspace{5mm}
+
+    Another scenario can be simulated by making the RPC calls a constant amount of times instead
+    of depending on the parameter, which produces the linear result in the plot below:\\
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.6\textwidth]{analysis2.png}
+        \includegraphics[width=0.7\textwidth]{analysis2.png}
         \caption{The second plot produced by \texttt{freud-statistics}}
         \label{fig:analysis2}
     \end{figure}
+
+    And the corresponding elementary algorithm:\\
+
+    \begin{algorithm}[H]
+        \SetAlgoLined
+        \For{$i \gets 0$ \textbf{to} NUM\_MSG} {
+            \For{$j \gets 0$ \textbf{to} NUM\_POINTS} {
+                sleep($i + $ random\_margin())\;
+            }
+        }
+        \caption{Linear simulation algorithm}
+    \end{algorithm}
+
+    \vspace{5mm}
 
 
     \section{Testing}

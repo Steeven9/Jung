@@ -29,7 +29,8 @@
 #include "custom_instr.h"
 
 #define SERVER_PORT 50051
-#define NUM_MSG 30
+#define NUM_MSG 20
+#define NUM_POINTS 5
 #define NUM_THREADS 4
 #define CLEAR_LOG true
 
@@ -206,7 +207,9 @@ int main(int argc, char** argv) {
 	cout << "-> Starting RPC test..." << endl;
 	for (int i = 0; i < NUM_MSG; ++i) {
 		cout << "--> Iteration " << i << "/" << NUM_MSG << endl;
-		do_stuff(i);
+		for (int j = 0; j < NUM_POINTS; ++j) {
+			do_stuff(i);
+		}
 	}
 
 	cout << "-> Starting multithreaded test..." << endl;
