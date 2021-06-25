@@ -30,7 +30,7 @@
 
 #define SERVER_PORT 50051
 #define NUM_MSG 20
-#define NUM_POINTS 5
+#define NUM_POINTS 3
 #define NUM_THREADS 4
 #define CLEAR_LOG true
 

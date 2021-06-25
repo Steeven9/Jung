@@ -4,14 +4,13 @@ Freud~\cite{freud} is a software performance analysis tool that
 derives performance annotations from measurements of running
 systems. What does that mean?  Freud performs a dynamic analysis of a
 software system, and requires only the system in binary form.  Given
-the program executable, compiled with debugging option, Freud can
+the program executable, compiled with debugging options, Freud can
 instrument the system to measure a series of metrics, such as running
 time and memory usage, while also tracing the function calls and their
-parameters. Freud then analyzes this data (off-line) to produce
+parameters. Freud then analyzes this data (offline) to produce
 significant statistical models that characterize the performance
 metrics as functions of one or more input parameters (or
-``features'').
-
+``features'').\\
 
 The goal of this project is to extend Freud to collect and analyze
 data from a \emph{distributed} software system.  This includes desktop
@@ -19,9 +18,9 @@ or server applications that might use external services, typically
 through remote procedure calls (RPC), or a web application components
 that query external servers such as a database.  To highlight the
 relation with the Freud tool and technique, we decided to name this
-project Jung---after influential Swiss psychiatrist and psychoanalyist
+project Jung --- after influential Swiss psychiatrist and psychoanalyst
 Carl Jung\footnote{\url{https://en.wikipedia.org/wiki/Carl_Jung}} who
-was a colleague and collaborator of Sigmund Freud.
+was a colleague and collaborator of Sigmund Freud.\\
 
 In essence, Jung instruments a distributed system so that each
 distributed component would measure various performance metrics of
@@ -30,16 +29,16 @@ within each component.  Jung then takes care of collecting and merging
 these separate traces so as to assemble a unified trace that would
 then be processed through the statistics module of Freud.  In
 particular, the instrumentation provided by Jung traces related calls
-\emph{across} distributed component.  The relation between calls
-amount to causal relations and therefore are used as a basis for the
-merge operation.
+\emph{across} distributed components using unique identifiers.  The 
+relation between calls amount to causal relations and therefore are
+used as a basis for the merge operation.\\
 
 Freud uses a powerful binary instrumentation framework called
 Pin~\cite{PIN}.  In the initial prototype we developed during this
 project, we opted for a simpler solution, and therefore decided to
-inject our instumentation directly within the source-code, manually.
+inject our instrumentation directly within the source code, manually.
 A fully automatic instrumentation could be added in future
-developments.
+developments to reduce the overhead of using Jung.
 
 
 \chapter{Performance analysis}
@@ -47,14 +46,14 @@ developments.
     % What is it, problem context, existing solutions in general
 
     As the name implies, performance analysis is a field that deals with the examination of
-    how efficiently some code runs. It's a very vast realm and everyone is - in some
-    way - in need of it; after all, especially in large companies, efficiency is key. Imagine if
+    how efficiently some code runs. It's a very vast realm and everyone is --- in some
+    way --- in need of it; after all, especially in large companies, efficiency is key. Imagine if
     each Google query took one second less because a developer found out that they could
     optimize the database query, or if the loading time of a webpage got halved because the
     webmaster found a function that was holding for no reason: both of those could be the result
     of a performance analysis study.\\
 
-    As I mentioned, almost every kind of application can be measured, with a vast variety of what we call metrics:
+    As we mentioned, almost every kind of application can be measured, with a vast variety of what we call metrics:
     execution time, memory or CPU cycles used, lock holding time, and many more. Those can be used in
     various ways and will be chosen accordingly to the type of application. For example, a single-threaded app
     will not be concerned about lock holding time, while a frontend web developer isn't 
@@ -80,29 +79,26 @@ developments.
 
         % Brief description, intro to Freud and PIN, what they do and how
 
-        My project follows the steps of Freud, a tool developed by Daniele Rogora, an USI PhD student.
+        This project follows the steps of Freud, a tool developed by Daniele Rogora, an USI PhD student.
         This software has multiple components; the first two (\texttt{freud-dwarf} and \texttt{freud-pin})
         are tasked with instrumenting the executable 
-        via a special tool called PIN \cite{pin}, developed by Intel. This library - as explained earlier - 
+        via a special tool called PIN \cite{PIN}, developed by Intel. This library --- as explained earlier --- 
         inserts the instructions necessary to collect the data during the execution. Basically, coding this
         part means writing code that will write some code to put into other code.\\
 
-        The other part of Freud, which is the one I will be interacting with, is \texttt{freud-statistics}.
+        The other part of Freud, which is the one we will be interacting with, is \texttt{freud-statistics}.
         As the name implies, this module (based on the popular \texttt{R} library\footnote{\url{https://www.r-project.org/}})
-        computes some statistics, such as regression or clustering, given the output of the instrumentation.
+        processes the statistics, resulting in a regression or clustering, given the output of the instrumentation.
 
 
     \section{Requirements and analysis}\label{sec:requirements}
 
-        % Goals, what I needed to implement, refer to the plan and list of tasks, what's the idea
+        % Goals, what we needed to implement, refer to the plan and list of tasks, what's the idea
 
-        The main idea was to start small and build features incrementally, to ensure that I always
+        The main idea was to start small and build features incrementally, to ensure that we always
         had a minimal working prototype.  The main objective of
-        Jung---a name chosen after the influential Swiss psychiatrist
-        and psychoanalyist Carl
-        Jung\footnote{\url{https://en.wikipedia.org/wiki/Carl_Jung}},
-        who was also a colleague of Sigmund Freud---is to instrument multiple systems, collect the data and format it.
-        To achieve this, I divided the project in three main components:
+        Jung is to instrument multiple systems, collect the data and format it.
+        To achieve this, we divided the project in three main components:
 
         \begin{itemize}
             \item The actual instrumentation library, with an API to track the various metrics
@@ -112,16 +108,16 @@ developments.
              to \texttt{freud-statistics}
         \end{itemize}
 
-        The main milestones of the developments were the following: first I had to develop a
+        The main milestones of the developments were the following: first we had to develop a
         simple distributed application, based on an RPC library, to be used as an initial test environment.
-        For this part I chose to put together a relatively simple program that sends back and forward
+        For this part we chose to put together a relatively simple program that sends back and forward
         some text messages; the server has some delays set up in answering some queries to simulate a
         long computation.
 
-        Following that, I needed to develop an instrumentation for the
-        client side, server side, and---crucially---the RPC library:
+        Following that, we needed to develop an instrumentation for the
+        client side, server side, and --- crucially --- the RPC library:
         the idea was to measure some meaningful statistics on all
-        sides involved.  The metrics I settled with are:
+        sides involved.  The metrics we settled with are:
 
         \begin{itemize}
             \item Execution time
@@ -135,34 +131,34 @@ developments.
         between client (total, end-to-end, synchronous), server, and
         network.  All other metrics are computed and accounted for the
         client and server side.  All the chosen metrics except for the
-        memory-leak estimate are supported by
+        memory leak estimate are supported by
         \texttt{freud-statistics}.  Possible memory leaks are detected
         by tracing and matching the amount of \texttt{malloc} and
         \texttt{free} calls.  However, this computation can only offer
         an approximate leak detector.
 
-        Then, I had to devise a method to save and retrieve the measurement logs from all the components.
+        Then, we had to devise a method to save and retrieve the measurement logs from all the components.
         This has been done by dumping the collected information in a text file with some special encoding
         (see section \ref{sec:issues} for details) for data types and more complex values.\\
 
         The next step was to design an algorithm to merge the logs from all the systems into a single
-        coherent trace. This was tricky because I had to correctly identify all the remote calls to allow
+        coherent trace. This was tricky because we had to correctly identify all the remote calls to allow
         to trace back which server execution corresponded to which client function. We don't want to debit
-        someone with the computing costs of someone else, therefore I assigned unique IDs to each
+        someone with the computing costs of someone else, therefore we assigned unique IDs to each
         RPC call to allow to trace back which client function requested which server resource.\\
 
         Integrating said trace in the existing statistics tool (\texttt{freud-statistics}) to derive
-        the performance annotations was the last objective for the coding part. For this I had to rely on the
+        the performance annotations was the last objective for the coding part. For this we had to rely on the
         help of its creator, Daniele, to fully understand how to format the data. There were a few hiccups due to
         some technical issues, but the process concluded perfectly.
 
         Unfortunately, the only abandoned part of the project was to identify some third-party non-trivial
         distributed applications and analyze them with the created tool. Due to the fact that Jung doesn't work 
-        on the binary executable, I needed to access the source code of the application I wanted to 
+        on the binary executable, we needed to access the source code of the application we wanted to 
         analyze. This heavily reduced the spectrum of possible targets, and also considering the little time left we
         decided to abandon it.\\
 
-        Last but not least, I had to write the report, prepare the poster and the presentation. Due to the current
+        Last but not least, we had to write the report, prepare the poster and the presentation. Due to the current
         situation, we as a class decided to not hold any presentation this year, therefore this point got reduced
         to the document you're currently reading.\\
         
@@ -182,43 +178,43 @@ developments.
 
     \section{Technologies and tools used}
 
-        I used gRPC \cite{gRPCdocs} as the RPC library, since it seemed pretty straightforward and simple
+        We used gRPC \cite{gRPCdocs} as the RPC library, since it seemed pretty straightforward and simple
         to use. There are plenty of examples in the documentation and a lot of languages are supported,
         including C++. On the other hand, Jung is independent from any library:
         its functions can be used directly from the code, even in a custom RPC implementation.\\
 
         The choice of language was pretty easy as well: Freud is built entirely in C/C++, so using the same
-        language would increase compatibility. The only choice I had to make was regarding the version:
-        I went with C++17 to benefit from the \texttt{filesystem::exists()} function, which I used to check
+        language would increase compatibility. The only choice we had to make was regarding the version:
+        we went with C++17 to benefit from the \texttt{filesystem::exists()} function, which we used to check
         for the existence of previous log files.\\
 
-        To simplify development and testing, I also packaged an auto-building Docker image 
+        To simplify development and testing, we also packaged an auto-building Docker image 
         (\url{https://hub.docker.com/repository/docker/steeven9/jung}) with the example server in it.
-        This way I could keep the server running on another machine and, for example, test the network times
+        This way we could keep the server running on another machine and, for example, test the network times
         from another remote location.
 
 
     \section{Issues}\label{sec:issues}
 
-        The only major problem I had - which I believe to be very common - was that I made some
-        design choices in order to initially simplify my job, but then, with the addition of
-        new features or to fix certain problems, I had to change my approach. The direct consequence was that I
+        The only major problem we had - which we believe to be very common - was that we made some
+        design choices in order to initially simplify the job, but then, with the addition of
+        new features or to fix certain problems, we had to change approach. The direct consequence was that we
         had to rewrite some large parts of the code and data structures to adapt to the new requirements.\\
         
-        One instance of the aforementioned problem is that I had to develop some particular encodings
-        to represent the function parameters, since I had to convert from data (the running code) to text
-        (the log file) and vice versa. More specifically, I chose to represent the values as 
+        One instance of the aforementioned problem is that we had to develop some particular encodings
+        to represent the function parameters, since we had to convert from data (the running code) to text
+        (the log file) and vice versa. More specifically, we chose to represent the values as 
         \texttt{name\=type\&value} (e.g. \texttt{asd\=int\&12} for an integer named \texttt{asd} of value 12);
         this added a supplementary layer of encoding/decoding when saving and reading the data to/from the
         text files.\\
 
-        When we first started testing the integration with \texttt{freud-statistics}, since I was unable
-        to see what was in the binary file, I had troubles checking if I was dumping the metrics correctly,
+        When we first started testing the integration with \texttt{freud-statistics}, since we was unable
+        to see what was in the binary file, we had troubles checking if we was dumping the metrics correctly,
         resulting in some weird-looking statistics. With Daniele's help, we managed to make sense of
         the output and find the offending code parts to patch.\\
 
-        And of course, I had my fair share of miscellaneous issues with pointers, segmentation faults and 
-        general weird behaviors. As a positive note, in the process I somehow created a program that frees
+        And of course, we had our fair share of miscellaneous issues with pointers, segmentation faults and 
+        general weird behaviors. As a positive note, in the process we somehow created a program that frees
         memory as you run it:
 
         \begin{figure}[H]
@@ -238,10 +234,10 @@ developments.
 
     % Code validation, analysis of results and practical applications, personal experience (?)
 
-    Referring to the task list in section \ref{sec:requirements}, I can assert that I successfully implemented
+    Referring to the task list in section \ref{sec:requirements}, we can assert that we successfully implemented
     all the required features. The results the library provides are accurate (to a certain extent) and repeatable.\\
 
-    To test Jung's functionality I created a demo program that simulates a real use-case of this library:
+    To test Jung's functionality we created a demo program that simulates a real use-case of this library:
     a client program (\texttt{jung\_client}) sends some requests to a server (you guessed it, 
     \texttt{jung\_server}) which computes the results and sends them back. To make it more realistic,
     the server takes roughly the time in seconds equal to the parameter received (with some added
@@ -251,7 +247,7 @@ developments.
     the maximum number of iterations has been set to 20 and the number of points to 5,
     but those can easily be changed in the code (\texttt{NUM\_MSG} and \texttt{NUM\_POINTS} respectively).\\
 
-    Alas, time and coding constraints limited the amount of testing I could do,
+    Alas, time and coding constraints limited the amount of testing we could do,
     meaning that the performance analysis has been tested only with a few scenarios. The first one
     is illustrated in the plot below:\\
 
@@ -305,8 +301,8 @@ developments.
 
     \section{Testing}
 
-        Due to the complexity and particular nature of the software, I decided to not implement any automated
-        tests. Opposed to test-driven development, I had a more unstructured way of iterating over the code,
+        Due to the complexity and particular nature of the software, we decided to not implement any automated
+        tests. Opposed to test-driven development, we had a more unstructured way of iterating over the code,
         since the functionality had to be checked by hand by comparing the produced log files with the program.
         Therefore, the effective coverage is 0\%, but as someone once said:\\
 
@@ -356,7 +352,7 @@ developments.
 
     % Results wrt objectives, limitations
 
-    I consider the results I obtained pretty satisfying: I managed to realize a working application
+    We consider the obtained results pretty satisfying: we managed to realize a working application
     that complies with the requirements and could be used in the field to measure actual systems
     (with some limitations, of course). As the evaluation shows, Jung correctly tracks and aggregates
     metrics, producing an output which can be interpreted by another tool. Different behaviors are

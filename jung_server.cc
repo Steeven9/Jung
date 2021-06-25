@@ -56,7 +56,7 @@ class JungServiceImpl final : public Jung::Service {
 		func_name += to_string(getNextUid(func_name)) + " " + to_string(++reply_id);
 		start_instrum(func_name, server, { make_feature("msg_len", "int", to_string(request->message().length())) });
 
-		//Allocate a byte of memory but free it immediately
+		// Allocate a byte of memory but free it immediately
 		void* mem_p = custom_malloc(func_name, 1);
 
 		reply->set_message("Ciao " + request->message());
@@ -80,18 +80,18 @@ class JungServiceImpl final : public Jung::Service {
 		reply->set_message(to_string(stoi(request->message()) * 2));
 		reply->set_id(reply_id);
 
-		// allocate some memory without freeing it. Should warn
+		// Allocate some memory without freeing it. Should warn
 		custom_malloc(func_name, stoi(request->message()));
 
 		if (VERBOSE) {
-			cout << "Received " << func_name << ": " << request->message();
+			cout << "Received " << func_name << ", param: " << request->message();
 		}
 
-		// simulate a computation by sleeping for the given seconds / 2,
+		// Simulate a computation by sleeping for the given seconds / 2,
 		// with the addition of some randomness to spice it up
 		random_device rd;
 		mt19937 gen(rd());
-		int param = stoi(request->message());
+		double param = stod(request->message());
 		if (param < 1) {
 			param = 1;
 		}
@@ -100,7 +100,7 @@ class JungServiceImpl final : public Jung::Service {
 		if (VERBOSE) {
 			cout << " - d: " << val << endl;
 		}
-		this_thread::sleep_for(chrono::seconds(val));
+		this_thread::sleep_for(chrono::seconds(val / 2));
 
 		finish_instrum(func_name);
 		return Status::OK;
