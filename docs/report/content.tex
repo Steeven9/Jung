@@ -1,21 +1,45 @@
 \chapter{Introduction}
 
-    Freud \cite{freud} is a software performance analysis tool that derives performance annotations
-    from measurements of running systems. What does that mean? Given a program executable (compiled
-    with some particular option, but let's leave that for later) this tool can measure a series of 
-    metrics, like running time and memory usage, while also monitoring the function calls and their
-    parameters. The idea is to analyze this data to find out which parts of the software are the 
-    slowest or most resource-consuming, allowing the developers to fine-tune their code.\\
+Freud~\cite{freud} is a software performance analysis tool that
+derives performance annotations from measurements of running
+systems. What does that mean?  Freud performs a dynamic analysis of a
+software system, and requires only the system in binary form.  Given
+the program executable, compiled with debugging option, Freud can
+instrument the system to measure a series of metrics, such as running
+time and memory usage, while also tracing the function calls and their
+parameters. Freud then analyzes this data (off-line) to produce
+significant statistical models that characterize the performance
+metrics as functions of one or more input parameters (or
+``features'').
 
-    The goal of Jung, this project, is to extend the existing tool to collect data from a
-    distributed software system, like a desktop application executing Remote Procedure Calls,
-    or a web server querying a database. This means augmenting the existing implementation to
-    be able to merge the data collected over the various components in a single trace and
-    exporting it in a way that allows other programs to analyze it.\\
 
-    Due to the complexity of the operation, Jung can't (yet?) inject code in a compiled binary
-    but needs to be used as an external library; this can add a considerable overhead on the
-    programmer, but it still produces the desired statistics.
+The goal of this project is to extend Freud to collect and analyze
+data from a \emph{distributed} software system.  This includes desktop
+or server applications that might use external services, typically
+through remote procedure calls (RPC), or a web application components
+that query external servers such as a database.  To highlight the
+relation with the Freud tool and technique, we decided to name this
+project Jung---after influential Swiss psychiatrist and psychoanalyist
+Carl Jung\footnote{\url{https://en.wikipedia.org/wiki/Carl_Jung}} who
+was a colleague and collaborator of Sigmund Freud.
+
+In essence, Jung instruments a distributed system so that each
+distributed component would measure various performance metrics of
+interest.  The measurements are initially stored as separate traces
+within each component.  Jung then takes care of collecting and merging
+these separate traces so as to assemble a unified trace that would
+then be processed through the statistics module of Freud.  In
+particular, the instrumentation provided by Jung traces related calls
+\emph{across} distributed component.  The relation between calls
+amount to causal relations and therefore are used as a basis for the
+merge operation.
+
+Freud uses a powerful binary instrumentation framework called
+Pin~\cite{PIN}.  In the initial prototype we developed during this
+project, we opted for a simpler solution, and therefore decided to
+inject our instumentation directly within the source-code, manually.
+A fully automatic instrumentation could be added in future
+developments.
 
 
 \chapter{Performance analysis}
@@ -73,9 +97,11 @@
         % Goals, what I needed to implement, refer to the plan and list of tasks, what's the idea
 
         The main idea was to start small and build features incrementally, to ensure that I always
-        had a minimal working prototype. The main objective of Jung - a name chosen after Carl
+        had a minimal working prototype.  The main objective of
+        Jung---a name chosen after the influential Swiss psychiatrist
+        and psychoanalyist Carl
         Jung\footnote{\url{https://en.wikipedia.org/wiki/Carl_Jung}},
-        a colleague of Sigmund Freud - is to instrument multiple systems, collect the data and format it.
+        who was also a colleague of Sigmund Freud---is to instrument multiple systems, collect the data and format it.
         To achieve this, I divided the project in three main components:
 
         \begin{itemize}
@@ -90,27 +116,32 @@
         simple distributed application, based on an RPC library, to be used as an initial test environment.
         For this part I chose to put together a relatively simple program that sends back and forward
         some text messages; the server has some delays set up in answering some queries to simulate a
-        long computation.\\
+        long computation.
 
-        Following that, I needed to develop an instrumentation for the client side, server side,
-        and – crucially – the RPC library:
-        the idea was to measure some meaningful statistics on all sides involved. 
-        The metrics I settled with are:
+        Following that, I needed to develop an instrumentation for the
+        client side, server side, and---crucially---the RPC library:
+        the idea was to measure some meaningful statistics on all
+        sides involved.  The metrics I settled with are:
 
         \begin{itemize}
-            \item Execution time, divided in total, server, and network time
+            \item Execution time
             \item Memory usage
             \item Major and minor pagefaults
             \item Lock holding and waiting time
             \item Possible memory leaks (experimental)
         \end{itemize}
 
-        Except for the first one, all the other ones are divided in client and server side, to allow for an
-        accurate differentiation; futhermore, except for memory leaks, all of them are supported by 
-        \texttt{freud-statistics}. Possible memory leaks are detected by counting the amount of \texttt{malloc}
-        and \texttt{free} calls and can therefore be inaccurate in some cases.\\
+        The execution time is computed and accounted for separately
+        between client (total, end-to-end, synchronous), server, and
+        network.  All other metrics are computed and accounted for the
+        client and server side.  All the chosen metrics except for the
+        memory-leak estimate are supported by
+        \texttt{freud-statistics}.  Possible memory leaks are detected
+        by tracing and matching the amount of \texttt{malloc} and
+        \texttt{free} calls.  However, this computation can only offer
+        an approximate leak detector.
 
-        Then, i had to devise a method to save and retrieve the measurement logs from all the components.
+        Then, I had to devise a method to save and retrieve the measurement logs from all the components.
         This has been done by dumping the collected information in a text file with some special encoding
         (see section \ref{sec:issues} for details) for data types and more complex values.\\
 
