@@ -10,7 +10,7 @@ time and memory usage, while also tracing the function calls and their
 parameters. Freud then analyzes this data (offline) to produce
 significant statistical models that characterize the performance
 metrics as functions of one or more input parameters (or
-``features'').\\
+``features'').
 
 The goal of this project is to extend Freud to collect and analyze
 data from a \emph{distributed} software system.  This includes desktop
@@ -20,7 +20,7 @@ that query external servers such as a database.  To highlight the
 relation with the Freud tool and technique, we decided to name this
 project Jung --- after influential Swiss psychiatrist and psychoanalyst
 Carl Jung\footnote{\url{https://en.wikipedia.org/wiki/Carl_Jung}} who
-was a colleague and collaborator of Sigmund Freud.\\
+was a colleague and collaborator of Sigmund Freud.
 
 In essence, Jung instruments a distributed system so that each
 distributed component would measure various performance metrics of
@@ -31,7 +31,7 @@ then be processed through the statistics module of Freud.  In
 particular, the instrumentation provided by Jung traces related calls
 \emph{across} distributed components using unique identifiers.  The 
 relation between calls amount to causal relations and therefore are
-used as a basis for the merge operation.\\
+used as a basis for the merge operation.
 
 Freud uses a powerful binary instrumentation framework called
 Pin~\cite{PIN}.  In the initial prototype we developed during this
@@ -45,25 +45,27 @@ developments to reduce the overhead of using Jung.
 
     % What is it, problem context, existing solutions in general
 
-    As the name implies, performance analysis is a field that deals with the examination of
-    how efficiently some code runs. It's a very vast realm and everyone is --- in some
-    way --- in need of it; after all, especially in large companies, efficiency is key. Imagine if
-    each Google query took one second less because a developer found out that they could
-    optimize the database query, or if the loading time of a webpage got halved because the
-    webmaster found a function that was holding for no reason: both of those could be the result
-    of a performance analysis study.\\
+As the name implies, performance analysis is a field that deals with
+the examination of how efficiently some code runs. It's a very vast
+realm and everyone is---in some way---in need of it.  After all,
+especially in large companies, efficiency is key. Imagine if each
+Google query took one second less because a developer found out that
+they could optimize the database query, or if the loading time of a
+webpage got halved because the webmaster found a function that was
+holding for no reason: both of those could be the result
+of a performance analysis study.
 
     As we mentioned, almost every kind of application can be measured, with a vast variety of what we call metrics:
     execution time, memory or CPU cycles used, lock holding time, and many more. Those can be used in
     various ways and will be chosen accordingly to the type of application. For example, a single-threaded app
     will not be concerned about lock holding time, while a frontend web developer isn't 
-    necessarily interested in knowing about pagefaults.\\
+    necessarily interested in knowing about pagefaults.
 
     There are a lot of existing tools and solutions out there (one of which will be discussed in section \ref{sec:freud})
     that can \textit{instrument} the executables: a dedicated tool injects some special code directly in the compiled
     binary file, following some particular compiler flags. This generated code then measures
     different parameters, keeping track for example of starting and ending times, memory allocations, and so on.
-    At the end, an information dump is produced to summarize the data, which can then be analyzed in various ways.\\
+    At the end, an information dump is produced to summarize the data, which can then be analyzed in various ways.
 
     \begin{figure}[H]
         \centering
@@ -84,7 +86,7 @@ developments to reduce the overhead of using Jung.
         are tasked with instrumenting the executable 
         via a special tool called PIN \cite{PIN}, developed by Intel. This library --- as explained earlier --- 
         inserts the instructions necessary to collect the data during the execution. Basically, coding this
-        part means writing code that will write some code to put into other code.\\
+        part means writing code that will write some code to put into other code.
 
         The other part of Freud, which is the one we will be interacting with, is \texttt{freud-statistics}.
         As the name implies, this module (based on the popular \texttt{R} library\footnote{\url{https://www.r-project.org/}})
@@ -139,13 +141,13 @@ developments to reduce the overhead of using Jung.
 
         Then, we had to devise a method to save and retrieve the measurement logs from all the components.
         This has been done by dumping the collected information in a text file with some special encoding
-        (see section \ref{sec:issues} for details) for data types and more complex values.\\
+        (see section \ref{sec:issues} for details) for data types and more complex values.
 
         The next step was to design an algorithm to merge the logs from all the systems into a single
         coherent trace. This was tricky because we had to correctly identify all the remote calls to allow
         to trace back which server execution corresponded to which client function. We don't want to debit
         someone with the computing costs of someone else, therefore we assigned unique IDs to each
-        RPC call to allow to trace back which client function requested which server resource.\\
+        RPC call to allow to trace back which client function requested which server resource.
 
         Integrating said trace in the existing statistics tool (\texttt{freud-statistics}) to derive
         the performance annotations was the last objective for the coding part. For this we had to rely on the
@@ -156,11 +158,11 @@ developments to reduce the overhead of using Jung.
         distributed applications and analyze them with the created tool. Due to the fact that Jung doesn't work 
         on the binary executable, we needed to access the source code of the application we wanted to 
         analyze. This heavily reduced the spectrum of possible targets, and also considering the little time left we
-        decided to abandon it.\\
+        decided to abandon it.
 
         Last but not least, we had to write the report, prepare the poster and the presentation. Due to the current
         situation, we as a class decided to not hold any presentation this year, therefore this point got reduced
-        to the document you're currently reading.\\
+        to the document you're currently reading.
         
         Have a pizza: this is still on hold but will definitely be completed sooner or later. Every project needs
         a celebratory pizza at the end.
@@ -181,12 +183,12 @@ developments to reduce the overhead of using Jung.
         We used gRPC \cite{gRPCdocs} as the RPC library, since it seemed pretty straightforward and simple
         to use. There are plenty of examples in the documentation and a lot of languages are supported,
         including C++. On the other hand, Jung is independent from any library:
-        its functions can be used directly from the code, even in a custom RPC implementation.\\
+        its functions can be used directly from the code, even in a custom RPC implementation.
 
         The choice of language was pretty easy as well: Freud is built entirely in C/C++, so using the same
         language would increase compatibility. The only choice we had to make was regarding the version:
         we went with C++17 to benefit from the \texttt{filesystem::exists()} function, which we used to check
-        for the existence of previous log files.\\
+        for the existence of previous log files.
 
         To simplify development and testing, we also packaged an auto-building Docker image 
         (\url{https://hub.docker.com/repository/docker/steeven9/jung}) with the example server in it.
@@ -199,19 +201,19 @@ developments to reduce the overhead of using Jung.
         The only major problem we had - which we believe to be very common - was that we made some
         design choices in order to initially simplify the job, but then, with the addition of
         new features or to fix certain problems, we had to change approach. The direct consequence was that we
-        had to rewrite some large parts of the code and data structures to adapt to the new requirements.\\
+        had to rewrite some large parts of the code and data structures to adapt to the new requirements.
         
         One instance of the aforementioned problem is that we had to develop some particular encodings
         to represent the function parameters, since we had to convert from data (the running code) to text
         (the log file) and vice versa. More specifically, we chose to represent the values as 
         \texttt{name\=type\&value} (e.g. \texttt{asd\=int\&12} for an integer named \texttt{asd} of value 12);
         this added a supplementary layer of encoding/decoding when saving and reading the data to/from the
-        text files.\\
+        text files.
 
         When we first started testing the integration with \texttt{freud-statistics}, since we was unable
         to see what was in the binary file, we had troubles checking if we was dumping the metrics correctly,
         resulting in some weird-looking statistics. With Daniele's help, we managed to make sense of
-        the output and find the offending code parts to patch.\\
+        the output and find the offending code parts to patch.
 
         And of course, we had our fair share of miscellaneous issues with pointers, segmentation faults and 
         general weird behaviors. As a positive note, in the process we somehow created a program that frees
@@ -235,7 +237,7 @@ developments to reduce the overhead of using Jung.
     % Code validation, analysis of results and practical applications, personal experience (?)
 
     Referring to the task list in section \ref{sec:requirements}, we can assert that we successfully implemented
-    all the required features. The results the library provides are accurate (to a certain extent) and repeatable.\\
+    all the required features. The results the library provides are accurate (to a certain extent) and repeatable.
 
     To test Jung's functionality we created a demo program that simulates a real use-case of this library:
     a client program (\texttt{jung\_client}) sends some requests to a server (you guessed it, 
@@ -245,11 +247,11 @@ developments to reduce the overhead of using Jung.
     achieved by making the server thread sleep for the given input. On the other hand, the client
     uses a \texttt{for} loop to send the requests, so the parameter's value increases gradually;
     the maximum number of iterations has been set to 20 and the number of points to 5,
-    but those can easily be changed in the code (\texttt{NUM\_MSG} and \texttt{NUM\_POINTS} respectively).\\
+    but those can easily be changed in the code (\texttt{NUM\_MSG} and \texttt{NUM\_POINTS} respectively).
 
     Alas, time and coding constraints limited the amount of testing we could do,
     meaning that the performance analysis has been tested only with a few scenarios. The first one
-    is illustrated in the plot below:\\
+    is illustrated in the plot below:
 
     \begin{figure}[H]
         \centering
@@ -259,7 +261,7 @@ developments to reduce the overhead of using Jung.
     \end{figure}
 
     As we can see, our data fits nicely in a quadratic regression, as expected;
-    our client program can be represented with the following algorithm:\\
+    our client program can be represented with the following algorithm:
 
     \begin{algorithm}[H]
         \For{$i \gets 0$ \textbf{to} NUM\_MSG} {
@@ -275,7 +277,7 @@ developments to reduce the overhead of using Jung.
     \vspace{5mm}
 
     Another scenario can be simulated by making the RPC calls a constant amount of times instead
-    of depending on the parameter, which produces the linear result in the plot below:\\
+    of depending on the parameter, which produces the linear result in the plot below:
 
     \begin{figure}[H]
         \centering
@@ -284,7 +286,7 @@ developments to reduce the overhead of using Jung.
         \label{fig:analysis2}
     \end{figure}
 
-    And the corresponding elementary algorithm:\\
+    And the corresponding elementary algorithm:
 
     \begin{algorithm}[H]
         \SetAlgoLined
@@ -304,7 +306,7 @@ developments to reduce the overhead of using Jung.
         Due to the complexity and particular nature of the software, we decided to not implement any automated
         tests. Opposed to test-driven development, we had a more unstructured way of iterating over the code,
         since the functionality had to be checked by hand by comparing the produced log files with the program.
-        Therefore, the effective coverage is 0\%, but as someone once said:\\
+        Therefore, the effective coverage is 0\%, but as someone once said:
 
         \begin{quote} 
             \centering 
@@ -314,36 +316,36 @@ developments to reduce the overhead of using Jung.
 
     \section{Demo}
 
-        In this section you can find instruction on how to run a demo program and analyze the obtained data.\\
+        In this section you can find instruction on how to run a demo program and analyze the obtained data.
 
         To install and compile all the required software, simply run the \texttt{install.sh} script from the Jung repository.
-        In case of failure, please refer to the READMEs of each project for more information.\\
+        In case of failure, please refer to the READMEs of each project for more information.
 
-        First, start the server:\\
+        First, start the server:
 
-        \texttt{\$ ./jung\_server}\\
+        \texttt{\$ ./jung\_server}
         
-        While in another shell, run the client:\\
+        While in another shell, run the client:
         
-        \texttt{\$ ./jung\_client}\\
+        \texttt{\$ ./jung\_client}
 
         \textit{Note: if you run the server on another machine, you can pass the \texttt{---target=HOSTNAME}
         % three dashes in the sentence above render correctly dunno why leave it like that
-        argument to the client.}\\
+        argument to the client.}
 
-        Then, with both the client and server log files in the root folder, merge the traces:\\
+        Then, with both the client and server log files in the root folder, merge the traces:
 
-        \texttt{\$ ./trace\_merge}\\
+        \texttt{\$ ./trace\_merge}
 
         This will produce the binary data (under \texttt{symbols/}) and a summary of the execution
         (\texttt{trace\_log.txt}).
-        We can then run Freud's analysis tool:\\
+        We can then run Freud's analysis tool:
 
-        \texttt{\$ cd ../freud/freud-statistics}\\
+        \texttt{\$ cd ../freud/freud-statistics}
 
-        \texttt{\$ ./freud\_statistics 3 0 0 do\_stuff ../../Jung/symbols/do\_stuff/}\\
+        \texttt{\$ ./freud\_statistics 3 0 0 do\_stuff ../../Jung/symbols/do\_stuff/}
         
-        \textit{Note: this is an example, refer to Freud's documentation for details and usage.}\\
+        \textit{Note: this is an example, refer to Freud's documentation for details and usage.}
 
         This should find a nice regression and plot it. That's it!
 
@@ -356,7 +358,7 @@ developments to reduce the overhead of using Jung.
     that complies with the requirements and could be used in the field to measure actual systems
     (with some limitations, of course). As the evaluation shows, Jung correctly tracks and aggregates
     metrics, producing an output which can be interpreted by another tool. Different behaviors are
-    correctly picked up and produce different outputs when analyzed, as expected.\\
+    correctly picked up and produce different outputs when analyzed, as expected.
     
     From a more personal point of view, the whole project was a great learning experience, both
     in terms of development and project management; in addition to refreshing my C++ skills, I
@@ -364,7 +366,7 @@ developments to reduce the overhead of using Jung.
     I would like to add that the way my advisor and I organized the work was very helpful: small
     steps and weekly meetings allowed to iterate quickly over the code and to keep 
     relatively on track with the schedule. As a matter of fact, the only discarded feature,
-    testing on third-party applications, was not mandatory for the completion of the project.\\
+    testing on third-party applications, was not mandatory for the completion of the project.
 
     I'd like to thank Antonio, my advisor, for the opportunity and for guiding me throughout
     this project; Daniele, Freud's author, for his help understanding his amazing software;
@@ -378,10 +380,10 @@ developments to reduce the overhead of using Jung.
         that could be implemented. For example a better handling of the data dumping via a separate thread:
         as of now every function writes the buffered metrics to the log file when it finishes executing. While this
         is barely noticeable on a small scale, it could add a significative overhead under large loads
-        or in performance-critical systems.\\
+        or in performance-critical systems.
 
         A crucial missing part is an actual instrumentation like Freud's, either through PIN or another
-        similar library, allowing the user to work on the executables instead of having to change the source code.\\
+        similar library, allowing the user to work on the executables instead of having to change the source code.
 
         Other possible improvements would be to support more complex features as parameters, like structs,
         automatically infer the type of the parameter (opposed as having to manually specify it), and
